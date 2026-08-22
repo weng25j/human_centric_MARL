@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<net version="1.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,-60.00,320.00,0.00" origBoundary="0.00,-60.00,320.00,0.00" projParameter="!"/>
+
+    <!-- EDGES -->
+    <edge id="edge_warmup" from="node_start" to="node_warmup_end" priority="2">
+        <lane id="edge_warmup_0" index="0" speed="30.00" length="50.00" shape="0.00,-4.80 50.00,-4.80"/>
+        <lane id="edge_warmup_1" index="1" speed="30.00" length="50.00" shape="0.00,-1.60 50.00,-1.60"/>
+    </edge>
+
+    <edge id="edge_premerge" from="node_warmup_end" to="node_premerge_end" priority="2">
+        <lane id="edge_premerge_0" index="0" speed="30.00" length="150.00" shape="50.00,-4.80 200.00,-4.80"/>
+        <lane id="edge_premerge_1" index="1" speed="30.00" length="150.00" shape="50.00,-1.60 200.00,-1.60"/>
+    </edge>
+
+    <edge id="edge_ramp" from="node_ramp_start" to="node_premerge_end" priority="1">
+        <lane id="edge_ramp_0" index="0" speed="20.00" length="100.00" shape="120.00,-60.00 200.00,-8.00"/>
+    </edge>
+
+    <edge id="edge_merge" from="node_premerge_end" to="node_merge_end" priority="2">
+        <lane id="edge_merge_0" index="0" speed="30.00" length="100.00" shape="200.00,-4.80 300.00,-4.80"/>
+        <lane id="edge_merge_1" index="1" speed="30.00" length="100.00" shape="200.00,-1.60 300.00,-1.60"/>
+    </edge>
+
+    <edge id="edge_postmerge" from="node_merge_end" to="node_end" priority="2">
+        <lane id="edge_postmerge_0" index="0" speed="30.00" length="20.00" shape="300.00,-4.80 320.00,-4.80"/>
+        <lane id="edge_postmerge_1" index="1" speed="30.00" length="20.00" shape="300.00,-1.60 320.00,-1.60"/>
+    </edge>
+
+    <!-- JUNCTIONS (Collision and Yielding Logic) -->
+    <junction id="node_start" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-6.40"/>
+    
+    <junction id="node_warmup_end" type="priority" x="50.00" y="0.00" incLanes="edge_warmup_0 edge_warmup_1" intLanes="" shape="50.00,0.00 50.00,-6.40 50.00,0.00">
+        <request index="0" response="00" foes="00" cont="0"/>
+        <request index="1" response="00" foes="00" cont="0"/>
+    </junction>
+    
+    <junction id="node_ramp_start" type="dead_end" x="120.00" y="-60.00" incLanes="" intLanes="" shape="118.40,-61.60 121.60,-58.40"/>
+    
+    <junction id="node_premerge_end" type="priority" x="200.00" y="0.00" incLanes="edge_premerge_0 edge_premerge_1 edge_ramp_0" intLanes="" shape="200.00,0.00 200.00,-6.40 200.00,-9.60 201.60,-6.40">
+        <!-- Mainline has priority (000), Ramp must yield (110) -->
+        <request index="0" response="000" foes="000" cont="0"/>
+        <request index="1" response="000" foes="000" cont="0"/>
+        <request index="2" response="110" foes="110" cont="0"/>
+    </junction>
+    
+    <junction id="node_merge_end" type="priority" x="300.00" y="0.00" incLanes="edge_merge_0 edge_merge_1" intLanes="" shape="300.00,0.00 300.00,-6.40 300.00,0.00">
+        <request index="0" response="00" foes="00" cont="0"/>
+        <request index="1" response="00" foes="00" cont="0"/>
+    </junction>
+    
+    <junction id="node_end" type="dead_end" x="320.00" y="0.00" incLanes="edge_postmerge_0 edge_postmerge_1" intLanes="" shape="320.00,-6.40 320.00,0.00"/>
+
+    <!-- CONNECTIONS -->
+    <connection from="edge_warmup" to="edge_premerge" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from="edge_warmup" to="edge_premerge" fromLane="1" toLane="1" dir="s" state="M"/>
+    
+    <connection from="edge_premerge" to="edge_merge" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from="edge_premerge" to="edge_merge" fromLane="1" toLane="1" dir="s" state="M"/>
+    
+    <!-- Ramp merges into lane 0, lowercase 'm' means it must yield -->
+    <connection from="edge_ramp" to="edge_merge" fromLane="0" toLane="0" dir="s" state="m"/>
+    
+    <connection from="edge_merge" to="edge_postmerge" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from="edge_merge" to="edge_postmerge" fromLane="1" toLane="1" dir="s" state="M"/>
+
+</net>

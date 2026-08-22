@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- Define standard vehicle physics -->
+    <vTypeDistribution id="hdv_mixture">
+        
+        <!-- Cautious Driver (20% of HDVs): Slower, keeps larger distances, highly cooperative -->
+        <vType id="hdv_cautious" probability="0.2" 
+               carFollowModel="IDM" 
+               accel="2.0" decel="4.5" tau="1.8" 
+               speedFactor="0.9" speedDev="0.05"
+               lcCooperative="2.0" lcAssertive="0.1" 
+               color="0,255,0"/> <!-- Green -->
+        
+        <!-- Normal Driver (60% of HDVs): Baseline human driving parameters -->
+        <vType id="hdv_normal" probability="0.6" 
+               carFollowModel="IDM" 
+               accel="2.6" decel="4.5" tau="1.2" 
+               speedFactor="1.0" speedDev="0.1"
+               lcCooperative="1.0" lcAssertive="1.0" 
+               color="255,255,255"/> <!-- White -->
+        
+        <!-- Aggressive Driver (20% of HDVs): Faster, tailgates, rarely yields -->
+        <vType id="hdv_aggressive" probability="0.2" 
+               carFollowModel="IDM" 
+               accel="3.5" decel="4.5" tau="0.8" 
+               speedFactor="1.15" speedDev="0.1"
+               lcCooperative="0.1" lcAssertive="2.0" 
+               color="0,0,255"/> <!-- Blue -->
+               
+    </vTypeDistribution>
+    <vType id="cav" 
+           carFollowModel="IDM" 
+           accel="2.6" decel="4.5" tau="1.0" 
+           color="255,0,0"/>
+    <!-- Define the Routes -->
+    <route id="route_main" edges="edge_warmup edge_premerge edge_merge edge_postmerge"/>
+    <route id="route_ramp" edges="edge_ramp edge_merge edge_postmerge"/>
+
+    <!-- MAINLINE FLOW (7200 veh/hr total) | 10% CAV -->
+    <!-- 90% Human (6480 veh/hr) -->
+    <flow id="human_main" type="hdv_mixture" route="route_main" begin="0" end="3600" vehsPerHour="6480" departLane="random" departSpeed="max"/>
+    <!-- 10% CAV (720 veh/hr) -->
+    <flow id="cav_main" type="cav" route="route_main" begin="0" end="3600" vehsPerHour="720" departLane="random" departSpeed="max"/>
+    
+    <!-- ON-RAMP FLOW (900 veh/hr total) | 10% CAV -->
+    <!-- 90% Human (810 veh/hr) -->
+    <flow id="human_ramp" type="hdv_mixture" route="route_ramp" begin="0" end="3600" vehsPerHour="810" departLane="0" departSpeed="max"/>
+    <!-- 10% CAV (90 veh/hr) -->
+    <flow id="cav_ramp" type="cav" route="route_ramp" begin="0" end="3600" vehsPerHour="90" departLane="0" departSpeed="max"/>
+</routes>

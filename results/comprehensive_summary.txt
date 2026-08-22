@@ -1,0 +1,80 @@
+
+ALL-HDV
+--------------------------------------------------------
+[Efficiency]
+  Throughput:           15704 vehicles
+  Mean Speed:           21.39 m/s
+  Mean Travel Time:     2.17 s
+
+[Safety]
+  Collision Rate:       0.00%
+  TTC Violations:       1746 instances
+  Hard Braking Events:  70 instances
+
+[Stability]
+  Acceleration Var:     1.6449 m/s^2
+  Mean Abs Jerk:        4.3922 m/s^3
+  Wave Intensity (Var): 35.11 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           6.55 s
+  90th-Percentile Delay:9.46 s
+
+[Control Cost (CAV Only)]
+  Interventions:        0 steps
+  Mean Decel Magnitude: 0.00 m/s^2
+  Mean Duration:        0.00 s
+
+
+RULE-CAV
+--------------------------------------------------------
+[Efficiency]
+  Throughput:           16734 vehicles
+  Mean Speed:           18.85 m/s
+  Mean Travel Time:     2.48 s
+
+[Safety]
+  Collision Rate:       0.00%
+  TTC Violations:       3486 instances
+  Hard Braking Events:  159 instances
+
+[Stability]
+  Acceleration Var:     1.9598 m/s^2
+  Mean Abs Jerk:        5.7208 m/s^3
+  Wave Intensity (Var): 27.00 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           8.70 s
+  90th-Percentile Delay:14.82 s
+
+[Control Cost (CAV Only)]
+  Interventions:        53600 steps
+  Mean Decel Magnitude: 2.63 m/s^2
+  Mean Duration:        0.00 s
+
+
+SELFISH-CAV
+--------------------------------------------------------
+[Efficiency]
+  Throughput:           15801 vehicles
+  Mean Speed:           22.27 m/s
+  Mean Travel Time:     2.10 s
+
+[Safety]
+  Collision Rate:       0.00%
+  TTC Violations:       1283 instances
+  Hard Braking Events:  65 instances
+
+[Stability]
+  Acceleration Var:     1.5416 m/s^2
+  Mean Abs Jerk:        4.1763 m/s^3
+  Wave Intensity (Var): 31.51 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           5.93 s
+  90th-Percentile Delay:8.70 s
+
+[Control Cost (CAV Only)]
+  Interventions:        3209 steps
+  Mean Decel Magnitude: 1.76 m/s^2
+  Mean Duration:        0.41 s

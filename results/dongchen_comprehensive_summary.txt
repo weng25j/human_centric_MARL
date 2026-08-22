@@ -1,0 +1,26 @@
+
+DONGCHEN06 FLAT-MARL
+--------------------------------------------------------
+[Efficiency]
+  Throughput:           7048 vehicles
+  Mean Speed:           10.07 m/s
+  Mean Travel Time:     4.74 s
+
+[Safety]
+  Collision Rate:       0.00%
+  TTC Violations:       30844 instances
+  Hard Braking Events:  1054 instances
+
+[Stability]
+  Acceleration Var:     2.6025 m/s^2
+  Mean Abs Jerk:        10.5745 m/s^3
+  Wave Intensity (Var): 39.76 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           27.89 s
+  90th-Percentile Delay:61.59 s
+
+[Control Cost (CAV Only)]
+  Interventions:        60882 steps
+  Mean Decel Magnitude: 1.94 m/s^2
+  Mean Duration:        0.44 s

@@ -1,0 +1,80 @@
+{
+    "All-HDV": {
+        "efficiency": {
+            "throughput": 15704,
+            "mean_speed": 21.386454671778623,
+            "mean_travel_time": 2.1740320937340805
+        },
+        "safety": {
+            "collision_rate": 0.0,
+            "ttc_violations": 1746,
+            "hard_braking": 70
+        },
+        "stability": {
+            "accel_variance": 1.6449396014397704,
+            "mean_jerk": 4.392161243325472,
+            "wave_intensity": 35.10600956874414
+        },
+        "fairness": {
+            "mean_hdv_delay": 6.546888984648291,
+            "p90_hdv_delay": 9.463636745935819
+        },
+        "control_cost": {
+            "intervention_steps": 0,
+            "mean_decel": 0.0,
+            "mean_duration": 0.0
+        }
+    },
+    "Rule-CAV": {
+        "efficiency": {
+            "throughput": 16734,
+            "mean_speed": 18.84825234275777,
+            "mean_travel_time": 2.480512728576551
+        },
+        "safety": {
+            "collision_rate": 0.0,
+            "ttc_violations": 3486,
+            "hard_braking": 159
+        },
+        "stability": {
+            "accel_variance": 1.9597516362023026,
+            "mean_jerk": 5.720845742971055,
+            "wave_intensity": 26.995319475591025
+        },
+        "fairness": {
+            "mean_hdv_delay": 8.697770679892844,
+            "p90_hdv_delay": 14.819835395908424
+        },
+        "control_cost": {
+            "intervention_steps": 53600,
+            "mean_decel": 2.6302475560517444,
+            "mean_duration": 0.0
+        }
+    },
+    "Selfish-CAV": {
+        "efficiency": {
+            "throughput": 15801,
+            "mean_speed": 22.269581374914978,
+            "mean_travel_time": 2.0964495917979873
+        },
+        "safety": {
+            "collision_rate": 0.0,
+            "ttc_violations": 1283,
+            "hard_braking": 65
+        },
+        "stability": {
+            "accel_variance": 1.5416294401748776,
+            "mean_jerk": 4.176290523084061,
+            "wave_intensity": 31.50809142102459
+        },
+        "fairness": {
+            "mean_hdv_delay": 5.928644959177777,
+            "p90_hdv_delay": 8.702398275494462
+        },
+        "control_cost": {
+            "intervention_steps": 3209,
+            "mean_decel": 1.7599615974586795,
+            "mean_duration": 0.40781049935979513
+        }
+    }
+}

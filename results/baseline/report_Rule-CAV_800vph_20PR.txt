@@ -1,0 +1,35 @@
+
+==================================================
+RULE-CAV: 800 veh/h/lane | 20% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 1677.2 ± 9.0 veh/h
+  Raw Arrivals (400s Episode):  186.3 ± 1.0 vehicles
+  Mean Speed:                   17.17 ± 0.19 m/s
+  Mean Travel Time:             46.19 ± 0.70 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg TTC Violations:           700.4 ± 271.8 per episode
+  Avg Hard Braking:             3525.2 ± 152.0 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             1.9158 ± 0.0497 m/s^2
+  Mean Abs Jerk:                3.3343 ± 0.2237 m/s^3
+  Wave Intensity (Var):         15.64 ± 1.85 (speed variance)
+
+[Control Cost (CAV Only)]
+  Interventions:                1159 ± 59 steps
+  Mean Decel Magnitude:         4.17 ± 0.05 m/s^2
+  Mean Duration:                1.82 ± 0.07 s
+
+[Merge Success & Queue]
+  Success Rate:                 73.44 ± 3.68 %
+  Avg Max Queue:                0.34 ± 0.10 vehicles
+  Absolute Max Queue:           4.4 ± 0.8 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   19.70 ± 0.69 s
+  90th-Percentile Delay:        29.63 ± 1.29 s
+==================================================

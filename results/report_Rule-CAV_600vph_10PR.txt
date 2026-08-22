@@ -1,0 +1,23 @@
+
+==================================================
+RULE-CAV: 600 vph | 10% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Avg Throughput/Ep:    162.1 vehicles
+  Mean Speed:           22.54 m/s
+  Mean Travel Time:     1.55 s
+
+[Safety]
+  Collision Rate:       0.00%
+  Avg TTC Violations:   0.1 per episode
+  Avg Hard Braking:     0.1 per episode
+
+[Stability]
+  Acceleration Var:     1.7554 m/s^2
+  Mean Abs Jerk:        4.6480 m/s^3
+  Wave Intensity (Var): 27.67 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           3.44 s
+  90th-Percentile Delay:6.54 s
+==================================================

@@ -1,0 +1,41 @@
+
+==================================================
+ALL-HDV: 1700 veh/h/lane | 0% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 2935.8 ± 44.9 veh/h
+  Raw Arrivals (400s Episode):  326.2 ± 5.0 vehicles
+  Mean Speed:                   11.28 ± 0.47 m/s
+  Mean Travel Time:             63.02 ± 2.51 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg Near-Collisions (TTC<1.5s): 169.0 ± 16.7 per episode
+  Avg TTC Violations (TTC<2.5s): 373.9 ± 36.0 per episode
+  Avg Hard Braking:             535.2 ± 24.3 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             1.1221 ± 0.0443 m/s^2
+  Mean Abs Jerk:                0.8856 ± 0.0526 m/s^3
+  Wave Intensity (Var):         21.64 ± 2.22 (speed variance)
+
+[Control Cost (CAV Only - Normalized Metrics)]
+  Raw Interventions (Sum):      0 ± 0 steps
+  Interventions Per CAV:        0.0 ± 0.0 steps/CAV
+  Duty Cycle (% Active Control): 0.00 ± 0.00 %
+  Mean Decel Magnitude:         0.00 ± 0.00 m/s^2
+  Mean Duration:                0.00 ± 0.00 s
+
+[Merge Success & Queue]
+  Success Rate:                 23.36 ± 2.54 %
+  Avg Max Queue:                21.50 ± 4.65 vehicles
+  Absolute Max Queue:           21.5 ± 4.6 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   37.46 ± 2.44 s
+  90th-Percentile Delay:        93.76 ± 8.87 s
+
+[Computational Latency]
+The cumulative distribution function (CDF) of the per-step inference time indicates that in 90% of cases, the inference time remains below 0.00 ms, with an average delay of 0.00 ms. Overall, the observed computational latency is sufficiently low to support real-time decision-making in high-speed traffic environments.
+==================================================

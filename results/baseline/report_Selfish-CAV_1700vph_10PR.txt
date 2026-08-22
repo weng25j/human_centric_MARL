@@ -1,0 +1,35 @@
+
+==================================================
+SELFISH-CAV: 1700 veh/h/lane | 10% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 2807.6 ± 56.8 veh/h
+  Raw Arrivals (400s Episode):  311.9 ± 6.3 vehicles
+  Mean Speed:                   10.10 ± 0.62 m/s
+  Mean Travel Time:             69.53 ± 2.95 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg TTC Violations:           13575.7 ± 1690.5 per episode
+  Avg Hard Braking:             3423.6 ± 157.2 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             0.9123 ± 0.0449 m/s^2
+  Mean Abs Jerk:                0.7600 ± 0.0585 m/s^3
+  Wave Intensity (Var):         15.81 ± 1.96 (speed variance)
+
+[Control Cost (CAV Only)]
+  Interventions:                8834 ± 524 steps
+  Mean Decel Magnitude:         0.82 ± 0.03 m/s^2
+  Mean Duration:                6.36 ± 0.31 s
+
+[Merge Success & Queue]
+  Success Rate:                 19.40 ± 4.53 %
+  Avg Max Queue:                14.14 ± 1.43 vehicles
+  Absolute Max Queue:           40.4 ± 3.4 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   43.00 ± 2.88 s
+  90th-Percentile Delay:        106.65 ± 10.87 s
+==================================================

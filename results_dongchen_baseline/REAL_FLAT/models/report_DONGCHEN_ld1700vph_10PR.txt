@@ -1,0 +1,35 @@
+
+==================================================
+DONGCHEN06 BASELINE: 1700 veh/h/lane | 10% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 2824.7 ± 58.4 veh/h
+  Raw Arrivals (400s Episode):  313.9 ± 6.5 vehicles
+  Mean Speed:                   10.10 ± 0.55 m/s
+  Mean Travel Time:             69.54 ± 2.97 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg TTC Violations:           12927.1 ± 1519.9 per episode
+  Avg Hard Braking:             3415.6 ± 143.7 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             0.9320 ± 0.0529 m/s^2
+  Mean Abs Jerk:                0.8014 ± 0.0593 m/s^3
+  Wave Intensity (Var):         15.61 ± 1.06 (speed variance)
+
+[Control Cost (CAV Only)]
+  Interventions:                8710 ± 385 steps
+  Mean Decel Magnitude:         0.89 ± 0.03 m/s^2
+  Mean Duration:                2.75 ± 0.17 s
+
+[Merge Success & Queue]
+  Success Rate:                 18.81 ± 4.27 %
+  Avg Max Queue:                14.34 ± 1.39 vehicles
+  Absolute Max Queue:           41.7 ± 3.4 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   43.07 ± 2.99 s
+  90th-Percentile Delay:        103.93 ± 10.41 s
+==================================================

@@ -1,0 +1,50 @@
+<routes>
+    <!-- 1. Define the HDV Behavior Distribution -->
+    <vTypeDistribution id="hdv_mixture">
+        
+        <!-- Cautious Driver (20% of HDVs): Slower, keeps larger distances, highly cooperative -->
+        <vType id="hdv_cautious" probability="0.2" 
+               carFollowModel="IDM" 
+               accel="2.0" decel="4.5" tau="1.8" 
+               speedFactor="0.9" speedDev="0.05"
+               lcCooperative="2.0" lcAssertive="0.1" 
+               color="0,255,0"/> <!-- Green -->
+        
+        <!-- Normal Driver (60% of HDVs): Baseline human driving parameters -->
+        <vType id="hdv_normal" probability="0.6" 
+               carFollowModel="IDM" 
+               accel="2.6" decel="4.5" tau="1.2" 
+               speedFactor="1.0" speedDev="0.1"
+               lcCooperative="1.0" lcAssertive="1.0" 
+               color="255,255,255"/> <!-- White -->
+        
+        <!-- Aggressive Driver (20% of HDVs): Faster, tailgates, rarely yields -->
+        <vType id="hdv_aggressive" probability="0.2" 
+               carFollowModel="IDM" 
+               accel="3.5" decel="4.5" tau="0.8" 
+               speedFactor="1.15" speedDev="0.1"
+               lcCooperative="0.1" lcAssertive="2.0" 
+               color="0,0,255"/> <!-- Blue -->
+               
+    </vTypeDistribution>
+
+    <!-- 2. Define the CAV (Controlled by your RL Agent via TraCI) -->
+    <!-- We give it standard physics, but its logic will be driven by your code -->
+    <vType id="cav" 
+           carFollowModel="IDM" 
+           accel="2.6" decel="4.5" tau="1.0" 
+           color="255,0,0"/> <!-- Red -->
+
+    <!-- 3. Define the Traffic Flows -->
+    <!-- Example: Simulating a 10% CAV penetration rate -->
+    
+    <route id="route_main" edges="E0 E1 E6" />
+    <route id="route_ramp" edges="E_ramp E1 E6" />
+
+    <!-- Spawn HDVs using the distribution at 900 vehicles per hour -->
+    <flow id="human_flow" type="hdv_mixture" route="route_main" begin="0" end="10000" departLane="random" probability="0.25" departSpeed="random"/>
+    
+    <!-- Spawn CAVs as the sparse controllers at 100 vehicles per hour -->
+    <flow id="human_ramp_flow" type="hdv_mixture" route="route_ramp" begin="0" end="10000" departLane="random" probability="0.1"/>
+
+</routes>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <!-- Link to your compiled network and traffic flows -->
+        <net-file value="updated_highway.net.xml"/>
+        <route-files value="updated_highway.rou.xml"/>
+    </input>
+
+    <time>
+        <!-- Simulation starts at 0 and uses 0.1 second steps to match your Python scripts -->
+        <begin value="0"/>
+        <step-length value="0.1"/>
+    </time>
+
+    <processing>
+        <!-- Prevents SUMO from magically teleporting cars that get stuck in traffic jams -->
+        <!-- This is crucial for RL so the agent actually has to deal with the consequences of a crash or jam -->
+        <time-to-teleport value="-1"/>
+        
+        <!-- Enable lane changing and standard safe following behaviors for the human vehicles -->
+        <lanechange.duration value="2.0"/>
+    </processing>
+
+    <report>
+        <verbose value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</sumoConfiguration>

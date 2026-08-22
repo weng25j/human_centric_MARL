@@ -1,0 +1,23 @@
+
+==================================================
+SELFISH-CAV: 600 vph | 20% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Avg Throughput/Ep:    159.8 vehicles
+  Mean Speed:           25.54 m/s
+  Mean Travel Time:     1.37 s
+
+[Safety]
+  Collision Rate:       0.00%
+  Avg TTC Violations:   0.1 per episode
+  Avg Hard Braking:     0.0 per episode
+
+[Stability]
+  Acceleration Var:     1.0201 m/s^2
+  Mean Abs Jerk:        3.2142 m/s^3
+  Wave Intensity (Var): 37.62 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           2.81 s
+  90th-Percentile Delay:5.47 s
+==================================================

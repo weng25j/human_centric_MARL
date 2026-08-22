@@ -1,0 +1,28 @@
+
+==================================================
+FINAL MAPPO TRAFFIC SHEPHERD EVALUATION RESULTS
+==================================================
+[Efficiency]
+  Throughput:           16527 vehicles
+  Mean Speed:           17.56 m/s
+  Mean Travel Time:     2.68 s
+
+[Safety]
+  Collision Rate:       0.00%
+  TTC Violations:       2782 instances
+  Hard Braking Events:  147 instances
+
+[Stability]
+  Acceleration Var:     2.0174 m/s^2
+  Mean Abs Jerk:        6.7243 m/s^3
+  Wave Intensity (Var): 20.04 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           10.18 s
+  90th-Percentile Delay:16.37 s
+
+[Control Cost (CAV Only)]
+  Interventions:        102830 steps
+  Mean Decel Magnitude: 2.60 m/s^2
+  Mean Duration:        1.46 s
+==================================================

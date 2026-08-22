@@ -1,0 +1,15 @@
+Loading net-file from 'SUMO_network/test.net.xml' ... done (1ms).
+Loading route-files incrementally from 'SUMO_network/highway_onramp_actual.rou.xml'
+Loading done.
+Warning: Value of tau=0.80 in vehicle type 'hdv_aggressive' lower than simulation step size may cause collisions.
+Simulation version 1.27.1 started with time: 0.00.
+Simulation ended at time: 10.00.
+Reason: The final simulation step has been reached.
+Performance:
+ Duration: 0.00s
+ Real time factor: 3333.33
+ UPS: 26000.000000
+Vehicles:
+ Inserted: 12 (Loaded: 13)
+ Running: 12
+ Waiting: 1

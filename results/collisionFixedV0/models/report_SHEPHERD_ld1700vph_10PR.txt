@@ -1,0 +1,37 @@
+
+==================================================
+TRAFFIC SHEPHERD: 1700 veh/h/lane | 10% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 2727.4 ± 85.5 veh/h
+  Raw Arrivals (400s Episode):  303.1 ± 9.5 vehicles
+  Mean Speed:                   11.86 ± 0.71 m/s
+  Mean Travel Time:             72.01 ± 4.37 s
+
+[Safety]
+  Collision Rate:               0.30 ± 0.14 %
+  Avg Near-Collisions (TTC<1.5s): 896.6 ± 108.7 per episode
+  Avg TTC Violations (TTC<2.5s): 1311.8 ± 142.7 per episode
+  Avg Hard Braking:             876.8 ± 42.6 per episode
+
+[Driving Comfort (Stability)]
+  Acceleration Var:             0.9889 ± 0.0547 m/s^2
+  Mean Abs Jerk:                1.4178 ± 0.0667 m/s^3
+  Wave Intensity (Var):         16.45 ± 1.90 (speed variance)
+  
+[Control Cost (CAV Only)]
+  Raw Interventions (Sum):      11234 ± 641 steps
+  Interventions Per CAV:        260.5 ± 17.8 steps/CAV
+  Duty Cycle (% Active Control): 33.97 ± 0.73 %
+  Mean Decel Magnitude:         1.24 ± 0.03 m/s^2
+  Mean Duration:                0.32 ± 0.01 s
+
+[Merge Success & Queue]
+  Success Rate:                 17.54 ± 4.75 %
+  Avg Max Queue:                15.00 ± 1.38 vehicles
+  Absolute Max Queue:           42.7 ± 3.4 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   45.59 ± 4.36 s
+  90th-Percentile Delay:        109.42 ± 11.60 s
+==================================================

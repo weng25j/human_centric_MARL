@@ -1,0 +1,41 @@
+
+==================================================
+DONGCHEN06 BASELINE: 1700 veh/h/lane | 20% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 2131.2 ± 113.9 veh/h
+  Raw Arrivals (400s Episode):  236.8 ± 12.7 vehicles
+  Mean Speed:                   5.98 ± 0.41 m/s
+  Mean Travel Time:             88.94 ± 5.39 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg Near-Collisions (TTC<1.5s): 2799.2 ± 656.3 per episode
+  Avg TTC Violations (TTC<2.5s): 11623.1 ± 1518.5 per episode
+  Avg Hard Braking:             3963.9 ± 301.7 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             0.8813 ± 0.0345 m/s^2
+  Mean Abs Jerk:                1.6292 ± 0.0855 m/s^3
+  Wave Intensity (Var):         27.23 ± 2.07 (speed variance)
+
+[Control Cost (CAV Only - Normalized Metrics)]
+  Raw Interventions (Sum):      27748 ± 1518 steps
+  Interventions Per CAV:        360.4 ± 20.3 steps/CAV
+  Duty Cycle (% Active Control): 30.35 ± 1.17 %
+  Mean Decel Magnitude:         1.02 ± 0.02 m/s^2
+  Mean Duration:                0.48 ± 0.02 s
+
+[Merge Success & Queue]
+  Success Rate:                 60.97 ± 7.06 %
+  Avg Max Queue:                26.68 ± 1.28 vehicles
+  Absolute Max Queue:           51.2 ± 0.9 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   63.43 ± 5.61 s
+  90th-Percentile Delay:        127.63 ± 14.39 s
+
+[Computational Latency]
+The cumulative distribution function (CDF) of the per-step inference time indicates that in 90% of cases, the inference time remains below 3.82 ms, with an average delay of 2.76 ms. Overall, the observed computational latency is sufficiently low to support real-time decision-making in high-speed traffic environments.
+==================================================

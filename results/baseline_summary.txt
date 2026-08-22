@@ -1,0 +1,19 @@
+=== Final Baseline Benchmark Results ===
+
+ALL-HDV:
+  Avg Reward:   0.00 (± 0.00)
+  Efficiency:   21.19 m/s
+  Safety:       0.00% collision rate
+  Success Rate: 100.00%
+
+RULE-CAV:
+  Avg Reward:   484.75 (± 121.83)
+  Efficiency:   18.80 m/s
+  Safety:       0.00% collision rate
+  Success Rate: 100.00%
+
+SELFISH-CAV:
+  Avg Reward:   706.56 (± 158.13)
+  Efficiency:   21.86 m/s
+  Safety:       0.00% collision rate
+  Success Rate: 100.00%

@@ -1,0 +1,28 @@
+{
+    "DongChen06": {
+        "efficiency": {
+            "throughput": 899,
+            "mean_speed": 19.702681784488373,
+            "mean_travel_time": 2.3438264738598447
+        },
+        "safety": {
+            "collision_rate": 0.0,
+            "ttc_violations": 344,
+            "hard_braking": 26
+        },
+        "stability": {
+            "accel_variance": 2.2540624596046555,
+            "mean_jerk": 7.317582835391564,
+            "wave_intensity": 32.10828454150946
+        },
+        "fairness": {
+            "mean_hdv_delay": 7.3106648711696325,
+            "p90_hdv_delay": 13.41466484281442
+        },
+        "control_cost": {
+            "intervention_steps": 2424,
+            "mean_decel": 2.5638843902737443,
+            "mean_duration": 0.3270801815431166
+        }
+    }
+}

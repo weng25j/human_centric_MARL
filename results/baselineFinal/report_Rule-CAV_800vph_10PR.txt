@@ -1,0 +1,41 @@
+
+==================================================
+RULE-CAV: 800 veh/h/lane | 10% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 1706.0 ± 12.8 veh/h
+  Raw Arrivals (400s Episode):  189.6 ± 1.4 vehicles
+  Mean Speed:                   19.84 ± 0.47 m/s
+  Mean Travel Time:             39.99 ± 1.15 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg Near-Collisions (TTC<1.5s): 7.0 ± 3.6 per episode
+  Avg TTC Violations (TTC<2.5s): 16.6 ± 7.9 per episode
+  Avg Hard Braking:             1199.4 ± 127.4 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             1.8610 ± 0.0714 m/s^2
+  Mean Abs Jerk:                2.5649 ± 0.2127 m/s^3
+  Wave Intensity (Var):         18.49 ± 2.41 (speed variance)
+
+[Control Cost (CAV Only - Normalized Metrics)]
+  Raw Interventions (Sum):      532 ± 50 steps
+  Interventions Per CAV:        24.2 ± 2.3 steps/CAV
+  Duty Cycle (% Active Control): 4.68 ± 0.40 %
+  Mean Decel Magnitude:         4.19 ± 0.07 m/s^2
+  Mean Duration:                1.75 ± 0.07 s
+
+[Merge Success & Queue]
+  Success Rate:                 72.97 ± 3.56 %
+  Avg Max Queue:                0.25 ± 0.19 vehicles
+  Absolute Max Queue:           0.2 ± 0.2 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   14.76 ± 1.15 s
+  90th-Percentile Delay:        26.69 ± 2.07 s
+
+[Computational Latency]
+The cumulative distribution function (CDF) of the per-step inference time indicates that in 90% of cases, the inference time remains below 1.45 ms, with an average delay of 0.89 ms. Overall, the observed computational latency is sufficiently low to support real-time decision-making in high-speed traffic environments.
+==================================================

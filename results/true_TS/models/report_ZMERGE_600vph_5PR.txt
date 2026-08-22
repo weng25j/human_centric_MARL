@@ -1,0 +1,28 @@
+
+==================================================
+TRAFFIC SHEPHERD: 600 vph | 5% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Avg Throughput/Ep:    58.7 vehicles
+  Mean Speed:           25.93 m/s
+  Mean Travel Time:     1.34 s
+
+[Safety]
+  Collision Rate:       0.00%
+  Avg TTC Violations:   0.0 per episode
+  Avg Hard Braking:     0.5 per episode
+
+[Driving Comfort (Stability)]
+  Acceleration Var:     0.9942 m/s^2
+  Mean Abs Jerk:        3.0811 m/s^3
+  Wave Intensity (Var): 29.93 (speed variance)
+  
+[Merge Success & Queue (Paper Metrics)]
+  Success Rate:         100.00% (251/251 ramp vehicles)
+  Avg Max Queue:        0.00 vehicles
+  Absolute Max Queue:   1 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:           2.30 s
+  90th-Percentile Delay:4.72 s
+==================================================

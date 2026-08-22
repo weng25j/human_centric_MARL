@@ -1,0 +1,41 @@
+
+==================================================
+SELFISH-CAV: 800 veh/h/lane | 10% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 1751.4 ± 7.5 veh/h
+  Raw Arrivals (400s Episode):  194.6 ± 0.8 vehicles
+  Mean Speed:                   26.40 ± 0.42 m/s
+  Mean Travel Time:             30.07 ± 0.55 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg Near-Collisions (TTC<1.5s): 3.9 ± 1.8 per episode
+  Avg TTC Violations (TTC<2.5s): 6.2 ± 2.4 per episode
+  Avg Hard Braking:             82.7 ± 9.7 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             1.0867 ± 0.0542 m/s^2
+  Mean Abs Jerk:                0.5796 ± 0.0427 m/s^3
+  Wave Intensity (Var):         23.06 ± 2.91 (speed variance)
+
+[Control Cost (CAV Only - Normalized Metrics)]
+  Raw Interventions (Sum):      571 ± 113 steps
+  Interventions Per CAV:        25.9 ± 5.1 steps/CAV
+  Duty Cycle (% Active Control): 9.03 ± 1.63 %
+  Mean Decel Magnitude:         0.75 ± 0.13 m/s^2
+  Mean Duration:                4.17 ± 0.68 s
+
+[Merge Success & Queue]
+  Success Rate:                 79.53 ± 3.83 %
+  Avg Max Queue:                0.30 ± 0.35 vehicles
+  Absolute Max Queue:           0.3 ± 0.4 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   6.49 ± 0.51 s
+  90th-Percentile Delay:        11.87 ± 2.32 s
+
+[Computational Latency]
+The cumulative distribution function (CDF) of the per-step inference time indicates that in 90% of cases, the inference time remains below 0.84 ms, with an average delay of 0.49 ms. Overall, the observed computational latency is sufficiently low to support real-time decision-making in high-speed traffic environments.
+==================================================

@@ -1,0 +1,23 @@
+
+==================================================
+ALL-HDV: 900 vph | 0% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Avg Throughput/Ep:    246.1 vehicles
+  Mean Speed:           23.74 m/s
+  Mean Travel Time:     1.46 s
+
+[Safety]
+  Collision Rate:       0.00%
+  Avg TTC Violations:   0.8 per episode
+  Avg Hard Braking:     0.1 per episode
+
+[Stability]
+  Acceleration Var:     1.1754 m/s^2
+  Mean Abs Jerk:        3.8070 m/s^3
+  Wave Intensity (Var): 35.41 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           3.34 s
+  90th-Percentile Delay:6.15 s
+==================================================

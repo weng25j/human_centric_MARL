@@ -1,0 +1,10 @@
+
+==================================================
+FINAL Z-MERGE METHODOLOGY EVALUATION RESULTS
+==================================================
+Traffic Efficiency (Avg Speed): 21.48 m/s
+Traffic Safety (AV Collision Rate): 0.00%
+Driving Comfort (Accel Variance): 1.49 m/s^2
+Average Queue Length: 0.63 vehicles/step
+Merging Success Rate: 99.80%
+==================================================

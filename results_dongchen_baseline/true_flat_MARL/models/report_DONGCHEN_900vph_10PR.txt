@@ -1,0 +1,28 @@
+
+==================================================
+DONGCHEN06 BASELINE: 900 vph | 10% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Avg Throughput/Ep:    249.8 vehicles
+  Mean Speed:           23.91 m/s
+  Mean Travel Time:     1.22 s
+
+[Safety]
+  Collision Rate:       0.00%
+  Avg TTC Violations:   0.0 per episode
+  Avg Hard Braking:     5.6 per episode
+
+[Driving Comfort (Stability)]
+  Acceleration Var:     0.9453 m/s^2
+  Mean Abs Jerk:        3.7042 m/s^3
+  Wave Intensity (Var): 0.00 (speed variance)
+
+[Merge Success & Queue (Paper Metrics)]
+  Success Rate:         99.60% (1006/1010 ramp vehicles)
+  Avg Max Queue:        0.00 vehicles
+  Absolute Max Queue:   2 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:           2.67 s
+  90th-Percentile Delay:5.40 s
+==================================================

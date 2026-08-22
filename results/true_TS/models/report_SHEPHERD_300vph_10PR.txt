@@ -1,0 +1,23 @@
+
+==================================================
+TRAFFIC SHEPHERD: 300 vph | 10% PR (Over 20 Seeds)
+==================================================
+[Efficiency]
+  Avg Throughput/Ep:    537.6 vehicles
+  Mean Speed:           24.55 m/s
+  Mean Travel Time:     1.42 s
+
+[Safety]
+  Collision Rate:       0.00%
+  Avg TTC Violations:   3.3 per episode
+  Avg Hard Braking:     44.9 per episode
+
+[Stability]
+  Acceleration Var:     1.1320 m/s^2
+  Mean Abs Jerk:        3.6072 m/s^3
+  Wave Intensity (Var): 18.89 (speed variance)
+
+[Fairness (HDV Only)]
+  Mean Delay:           3.16 s
+  90th-Percentile Delay:5.90 s
+==================================================

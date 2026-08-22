@@ -1,0 +1,35 @@
+
+==================================================
+ALL-HDV: 1700 veh/h/lane | 0% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 2722.5 ± 53.3 veh/h
+  Raw Arrivals (400s Episode):  302.5 ± 5.9 vehicles
+  Mean Speed:                   9.54 ± 0.35 m/s
+  Mean Travel Time:             70.87 ± 1.95 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg TTC Violations:           12653.1 ± 985.0 per episode
+  Avg Hard Braking:             3108.2 ± 135.6 per episode
+
+[Driving Comfort & Stability]
+  Acceleration Var:             0.8756 ± 0.0341 m/s^2
+  Mean Abs Jerk:                0.7620 ± 0.0399 m/s^3
+  Wave Intensity (Var):         15.52 ± 1.45 (speed variance)
+
+[Control Cost (CAV Only)]
+  Interventions:                0 ± 0 steps
+  Mean Decel Magnitude:         0.00 ± 0.00 m/s^2
+  Mean Duration:                0.00 ± 0.00 s
+
+[Merge Success & Queue]
+  Success Rate:                 16.49 ± 2.55 %
+  Avg Max Queue:                15.18 ± 1.38 vehicles
+  Absolute Max Queue:           44.4 ± 3.4 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   44.07 ± 1.91 s
+  90th-Percentile Delay:        106.77 ± 8.10 s
+==================================================

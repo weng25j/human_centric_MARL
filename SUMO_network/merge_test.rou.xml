@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routes>
+    <!-- 1. Vehicle Types -->
+    <!-- HDVs: Higher imperfection (sigma), standard car-following behavior -->
+    <vType id="human_driver" length="5.0" accel="2.6" decel="4.5" sigma="0.5" maxSpeed="30.0" color="1,0,0" />
+    
+    <!-- CAVs: Zero imperfection, used by your RL agent. Colored green for visibility -->
+    <vType id="cav" length="5.0" accel="3.0" decel="5.0" sigma="0.0" maxSpeed="30.0" color="0,1,0" />
+
+    <!-- 2. Route Definitions -->
+    <route id="route_main" edges="E0 E1 E6" />
+    <route id="route_ramp" edges="E_ramp E1 E6" />
+
+    <!-- 3. Traffic Flows (Spawning vehicles over time) -->
+    <!-- Mainline Flow: Mixed traffic (e.g., 80% HDV, 20% CAV) -->
+    <flow id="flow_main_hdv" type="human_driver" route="route_main" begin="0" end="10000" probability="0.20" />
+    <flow id="cav_ramp_traffic" type="cav" route="route_main" begin="0" end="10000" probability="0.05" />
+
+    <!-- On-Ramp Flow: 100% HDVs merging into the mainline -->
+    <flow id="flow_ramp_hdv" type="human_driver" route="route_ramp" begin="0" end="10000" probability="0.10" />
+</routes>

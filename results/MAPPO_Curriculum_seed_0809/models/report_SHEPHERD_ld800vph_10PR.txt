@@ -1,0 +1,41 @@
+
+==================================================
+TRAFFIC SHEPHERD: 800 veh/h/lane | 10% PR (Over 20 Seeds)
+Values reported as: Mean ± 95% Confidence Interval
+==================================================
+[Efficiency]
+  Equivalent Hourly Throughput: 1753.2 ± 7.4 veh/h
+  Raw Arrivals (400s Episode):  194.8 ± 0.8 vehicles
+  Mean Speed:                   26.21 ± 0.45 m/s
+  Mean Travel Time:             30.27 ± 0.62 s
+
+[Safety]
+  Collision Rate:               0.00 ± 0.00 %
+  Avg Near-Collisions (TTC<1.5s): 4.5 ± 1.9 per episode
+  Avg TTC Violations (TTC<2.5s): 7.4 ± 3.0 per episode
+  Avg Hard Braking:             92.2 ± 13.9 per episode
+
+[Driving Comfort (Stability)]
+  Acceleration Var:             1.1232 ± 0.0612 m/s^2
+  Mean Abs Jerk:                0.6044 ± 0.0522 m/s^3
+  Wave Intensity (Var):         25.60 ± 1.09 (speed variance)
+  
+[Control Cost (CAV Only)]
+  Raw Interventions (Sum):      681 ± 130 steps
+  Interventions Per CAV:        31.0 ± 5.9 steps/CAV
+  Duty Cycle (% Active Control): 10.57 ± 1.82 %
+  Mean Decel Magnitude:         0.98 ± 0.16 m/s^2
+  Mean Duration:                2.64 ± 0.82 s
+
+[Merge Success & Queue]
+  Success Rate:                 79.06 ± 4.31 %
+  Avg Max Queue:                0.22 ± 0.09 vehicles
+  Absolute Max Queue:           3.5 ± 0.5 vehicles
+
+[Fairness (HDV Only)]
+  Mean Delay:                   6.68 ± 0.59 s
+  90th-Percentile Delay:        12.49 ± 2.40 s
+  
+[Computational Latency]
+The cumulative distribution function (CDF) of the per-step inference time indicates that in 90% of cases, the inference time remains below 2.39 ms, with an average delay of 1.86 ms. Overall, the observed computational latency is sufficiently low to support real-time decision-making in high-speed traffic environments.
+==================================================
