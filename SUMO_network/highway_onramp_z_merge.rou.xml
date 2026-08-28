@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <vTypeDistribution id="hdv_mixture">
+        <vType id="hdv_cautious" probability="0.2" carFollowModel="IDM" accel="2.0" decel="4.5" emergencyDecel="7.5" apparentDecel="4.5" tau="1.8" speedFactor="0.9" speedDev="0.05" lcCooperative="2.0" lcAssertive="0.1" color="0,255,0"/>
+        <vType id="hdv_normal" probability="0.6" carFollowModel="IDM" accel="2.6" decel="4.5" emergencyDecel="8.0" apparentDecel="4.5" tau="1.2" speedFactor="1.0" speedDev="0.1" lcCooperative="1.0" lcAssertive="1.0" color="255,255,255"/>
+        <vType id="hdv_aggressive" probability="0.2" carFollowModel="IDM" accel="3.5" decel="4.5" emergencyDecel="9.0" apparentDecel="4.5" tau="0.8" speedFactor="1.25" speedDev="0.1" lcCooperative="0.0" lcAssertive="5.0" color="0,0,255"/>
+    </vTypeDistribution>
+    <vType id="cav" carFollowModel="IDM" accel="2.6" decel="4.5" emergencyDecel="8.0" tau="1.0" color="255,0,0"/>
+    <route id="route_main" edges="E0 E1 E6" />
+    <route id="route_ramp" edges="E_ramp E1 E6" />
+
+    <flow id="human_flow" type="hdv_mixture" route="route_main" begin="0" end="10000" vehsPerHour="1280.00" departLane="random" departSpeed="random" departPos="random"/>
+    <flow id="cav_main_flow" type="cav" route="route_main" begin="0" end="10000" vehsPerHour="320.00" departLane="random" departSpeed="random" departPos="random"/>
+    <flow id="human_ramp_flow" type="hdv_mixture" route="route_ramp" begin="0" end="10000" vehsPerHour="224.00" departLane="random" departSpeed="random" departPos="random"/>
+    <flow id="cav_ramp_flow" type="cav" route="route_ramp" begin="0" end="10000" vehsPerHour="56.00" departLane="random" departSpeed="random" departPos="random"/>
+</routes>
