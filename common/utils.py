@@ -83,11 +83,11 @@ def backup_project_files(tar_dir):
     Backs up your SUMO config files and python scripts to the results directory.
     """
     files_to_copy = [
-        'merging_network.net.xml',  # SUMO network
-        'traffic_routes.rou.xml',   # SUMO routes and HDV mixtures
-        'marl_on_ramp_env.py',      # Your PettingZoo environment
-        'ma2c_agent.py',            # The MA2C Algorithm
-        'main.py'                   # The training script
+        'SUMO_network/test.net.xml',
+        'SUMO_network/highway_onramp_actual_shepherd.rou.xml',
+        'environments/traffic_shepherd.py',
+        'algorithms/mappo.py',
+        'training/train_traffic_shepherd.py',
     ]
     
     for file in files_to_copy:

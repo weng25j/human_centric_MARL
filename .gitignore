@@ -1,0 +1,11 @@
+# Local Python environments and generated caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+
+# New simulation recordings and local diagnostics
+/temp_frames_*/
+/sumo_debug.log
