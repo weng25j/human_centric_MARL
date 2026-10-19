@@ -7,7 +7,7 @@
 Every learned method below has its own training and evaluation program. Run them from the repository root with `python -m` followed by the module name, without `.py`.
 
 | Method | Algorithm implementation | Training program | Evaluation program |
-| --- | --- | --- | --- |
+
 | **Traffic Shepherd (main novel method)** | [Human-centric environment/controller](environments/traffic_shepherd.py) with the [MAPPO learner](algorithms/mappo.py) | [`training.train_traffic_shepherd`](training/train_traffic_shepherd.py) | [`evaluation.evaluate_traffic_shepherd`](evaluation/evaluate_traffic_shepherd.py) |
 | Flat MAPPO / flat MARL | [MAPPO learner](algorithms/mappo.py) with the local-observation environment in its [trainer](training/train_flat_marl.py) | [`training.train_flat_marl`](training/train_flat_marl.py) | [`evaluation.evaluate_flat_marl`](evaluation/evaluate_flat_marl.py) |
 | Z-Merge | [Parameterized DQN agent](algorithms/z_merge.py) and [Z-Merge environment](environments/z_merge.py) | [`training.train_z_merge`](training/train_z_merge.py) | [`evaluation.evaluate_z_merge`](evaluation/evaluate_z_merge.py) |
@@ -22,7 +22,7 @@ Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Jus
 ## Repository guide
 
 | Location | Contents |
-| --- | --- |
+
 | `algorithms/` | `mappo.py`: shared MAPPO implementation; `z_merge.py`: parameterized DQN; `rule_based.py`: baseline policies; `ma2c.py`: experimental actor-critic agent. |
 | `environments/` | `traffic_shepherd.py`: 14-feature human-centric controller; `z_merge.py`: 22-feature Z-Merge environment; `pettingzoo_on_ramp.py`: experimental parallel environment. |
 | `training/` | Curriculum training entry points for Traffic Shepherd, flat MARL, and Z-Merge. |
@@ -86,7 +86,7 @@ Add `--gui` to watch SUMO, at a substantial runtime cost. Use `--help` on any of
 Output conventions inherited from the original runners:
 
 | Trainer | Run directory under `--base-dir` | Saved models |
-| --- | --- | --- |
+
 | Traffic Shepherd | `MAPPO_Curriculum_seed_0809/` (fixed name) | `models/checkpoint-<episode>.pt` |
 | Flat MARL | `0809/` (fixed name) | `models/checkpoint-<episode>.pt` |
 | Z-Merge | `ZMerge_Curriculum_seed_<seed>_<timestamp>/` | `models/zmerge_ep_<episode>_qnet.pth` and `_paramnet.pth`; final pair uses `zmerge_final`. |
