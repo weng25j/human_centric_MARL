@@ -31,7 +31,7 @@ Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Jus
 | `analysis/` | Report aggregation, summary tables, comparison plots, and poster figures. |
 | `common/` | Replay buffers, neural networks, tensor helpers, legacy agent bases, and K-FAC optimizer. `mappo_*` and `ma2c_*` identify the implementation they support. |
 | `experiments/` | Earlier MA2C/RLlib training prototypes, GUI demos, an import check, and an incomplete HDV-control sketch. |
-| `scripts/` | Shell helper for resuming MAPPO runs and PowerShell helper for recording comparisons. |
+| `scripts/` | Computer setup/activation, settings inspection, full experiment pipeline, and legacy resume/recording helpers. |
 | `SUMO_network/` | Network, route, simulation configuration, and GUI settings XML. |
 | `results/` | Existing Traffic Shepherd checkpoints/evaluations and non-learning baseline reports. |
 | `results_dongchen_baseline/` | Existing flat MARL checkpoints/evaluations, also labelled `DONGCHEN` in output filenames. |
@@ -42,29 +42,80 @@ Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Jus
 
 See the [complete file migration guide](docs/file_migration.md) for old-to-new filenames. Run entry points as modules, for example `python -m training.train_traffic_shepherd`, rather than running files inside these folders directly. All commands below assume your working directory is the repository root; relative network, model, and output paths depend on it.
 
-## Installation
+## Computer environment setup
 
-Python **3.12** is verified in the cloud environment. Create an isolated environment and install the pinned dependencies:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-# CPU build avoids downloading CUDA libraries on a CPU machine.
-python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.13.0
-python -m pip install -r requirements.txt eclipse-sumo==1.27.1
-python -m pip check
-sumo --version
-```
-
-On Windows, activate with `.venv\Scripts\Activate.ps1`. The existing `requirements.txt` is UTF-16; pip reads it directly. `eclipse-sumo` supplies the simulator executable, which the `traci` Python package alone does not provide. An independently installed SUMO 1.27.1 on `PATH` can also supply the simulator. GUI playback requires `sumo-gui` and a working graphical display. GPU training requires an appropriate PyTorch build and compatible hardware; GPU operation is not part of the verified cloud setup.
-
-For headless Linux runs, use a noninteractive plotting backend:
+Install **Python 3.12**, Git, and enough free disk for several GB of dependencies plus experiment outputs. CPU training is supported; a GPU is optional. On Ubuntu/Debian, the system packages below supply virtual-environment support and OpenCV's shared libraries (install Python 3.12 using your OS-supported method if unavailable):
 
 ```bash
-export MPLBACKEND=Agg
+sudo apt-get install python3.12-venv libgl1 libglib2.0-0
+git clone https://github.com/weng25j/human_centric_MARL.git
+cd human_centric_MARL
+python3.12 scripts/setup_environment.py
+source scripts/activate_environment.sh
+python scripts/show_settings.py
 ```
 
-In the prepared cloud environment, activate the existing environment with `source /workspace/venvs/human-centric-marl/bin/activate` instead of creating another one.
+If the repository is already cloned, start with the setup command in that checkout. The setup script creates `.venv`, installs the official CPU build of PyTorch, all original pinned libraries, SUMO, and the Excel writer, then checks dependencies, the simulator, and training imports. It can be rerun to refresh the same virtual environment. It does not install OS packages or change algorithm settings.
+
+On Windows PowerShell:
+
+```powershell
+py -3.12 scripts/setup_environment.py
+& .\.venv\Scripts\Activate.ps1
+$env:MPLBACKEND = "Agg"
+$env:OMP_NUM_THREADS = "2"
+$env:PYTHONDONTWRITEBYTECODE = "1"
+python scripts/show_settings.py
+```
+
+Linux execution is verified. Windows commands are provided, but Windows/GUI execution has not been tested here; the pinned simulator/PyTorch distributions must support your OS and architecture. GUI recording additionally needs `sumo-gui` and a graphical display. The default CPU setup avoids CUDA downloads. For GPU use, select a compatible official PyTorch index with `--torch-index-url`; driver/GPU operation is not validated by this setup.
+
+For an existing environment, use `python scripts/setup_environment.py --venv PATH`. In the prepared cloud machine, that path is `/workspace/venvs/human-centric-marl`. Set `MARL_VENV` to the same path before sourcing `scripts/activate_environment.sh`. The original UTF-16 `requirements.txt` is read directly; extra simulator/Excel requirements are in `requirements-tools.txt`.
+
+See [current settings and environment variables](docs/current_settings.md) for full trainer CONFIG values, effective learner settings, evaluator seeds/horizons, and every supported workflow variable. `python scripts/show_settings.py` reports their actual values in your current shell. No credentials or API keys are needed.
+
+## Run all methods and export a spreadsheet
+
+After activation, preview the commands, then run the pipeline:
+
+```bash
+python scripts/run_experiments.py --run-dir runs/experiment_01 --dry-run
+python scripts/run_experiments.py --run-dir runs/experiment_01
+```
+
+This serially trains and evaluates **Traffic Shepherd**, **flat MAPPO**, and **Z-Merge**, evaluates **All-HDV, Rule-CAV, and Selfish-CAV**, then combines evaluation outputs into:
+
+- `runs/experiment_01/results/combined_traffic_results.xlsx`
+- `runs/experiment_01/results/combined_traffic_results.csv`
+
+Training retains the existing 3,000-episode defaults and can be lengthy. Baselines are fixed policies and do not need training. The experimental MA2C/RLlib prototypes are excluded because their integration remains incomplete. Omit `--run-dir` for a new timestamped `runs/` directory.
+
+The runner copies SUMO inputs into per-method workspaces, keeping the checkout's route files intact. It records commands/output in `logs/` and settings in `settings.json` and `pipeline_options.json`. Model copies are evaluated in new timestamped folders so evaluation output does not overwrite original weights. Existing trained model directories block retraining into the same run; choose a fresh directory. The scripts stop on errors, including missing checkpoints.
+
+Separate stages and selected methods:
+
+```bash
+python scripts/run_experiments.py --stage train --run-dir runs/experiment_02
+python scripts/run_experiments.py --stage evaluate --run-dir runs/experiment_02
+python scripts/run_experiments.py --stage results --run-dir runs/experiment_02
+
+# Only the main novel method, with a narrower evaluation grid:
+python scripts/run_experiments.py --methods shepherd --run-dir runs/shepherd_01 \
+  --eval-demands 800 --eval-prs 0.10
+```
+
+`evaluate` automatically exports results. To use existing weights, supply `--shepherd-model-dir`, `--flat-model-dir`, and/or `--zmerge-model-prefix` with `--stage evaluate` and matching `--methods`. These paths are relative to the shell where you start the script; the runner makes them absolute. Use `--python PATH` if the intended virtual environment is not active. `--help` lists all options. The underlying evaluation seeds and step counts remain unchanged; narrowing the grid still runs all 20 MAPPO/baseline seeds.
+
+To combine **all existing evaluation data** without starting training:
+
+```bash
+python -m analysis.combine_evaluation_reports \
+  --search-dirs results results_dongchen_baseline results_zmerge \
+  --output-csv reports/data/combined_traffic_results.csv \
+  --output-xlsx reports/data/combined_traffic_results.xlsx
+```
+
+Workbook sheets contain a report-level summary, numeric metrics with separate confidence intervals, complete original report text, saved speed/deceleration/jerk time-series values, and an index of plots/recordings/arrays. Source paths preserve provenance. Large time-series exports split across Excel sheets automatically; `--no-arrays` exports summaries and an artifact index without embedding the values. Different runs are retained separately rather than averaged. Unreported Z-Merge metadata stays blank, and average queue length is kept separate from average maximum queue length. Raw per-seed values absent from saved reports cannot be reconstructed. Reports in nonstandard folders can be included through `--search-dirs`.
 
 ## Training
 
@@ -153,7 +204,7 @@ python -m recording.record_flat_marl \
 MP4 files go into `recordings/` under the model directory. The comprehensive MAPPO evaluators also accept `--gui` and `--record-video`. Existing `temp_frames_*` directories contain historical intermediate screenshots.
 
 ```bash
-# Edit folders_to_search in this module to select your evaluation directories.
+# Select additional folders using --search-dirs as needed.
 python -m analysis.combine_evaluation_reports
 # Uses combined_traffic_results.csv:
 python -m analysis.render_results_table
@@ -161,7 +212,7 @@ python -m analysis.plot_policy_comparisons
 python -m analysis.plot_evaluation_metrics
 ```
 
-The table goes to `reports/figures/comprehensive_results_table.png`; comparison charts go to `comparison_charts/`, and comprehensive metric plots to `graphs_output/`. Aggregation overwrites the root CSV. Its default search paths match the original fixed training output directories; change them for custom runs.
+The table goes to `reports/figures/comprehensive_results_table.png`; comparison charts go to `comparison_charts/`, and comprehensive metric plots to `graphs_output/`. The exporter writes a CSV and an Excel workbook. Its default search roots include all three existing results directories, including Z-Merge; use `--search-dirs` for custom runs. Default root output names are overwritten when explicitly rerun; use a separate output path to preserve earlier exports.
 
 Other analysis modules are specialized: `plot_training_rewards` expects `results/episode_rewards.npy`; `plot_safety_benchmarks` expects per-policy/per-seed arrays; `plot_speed_comparison` has explicit input path constants; `plot_success_vs_intervention` uses hardcoded poster values rather than recomputing experiment results. Inspect those inputs before using them for a new study.
 

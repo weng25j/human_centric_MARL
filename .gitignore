@@ -9,3 +9,6 @@ __pycache__/
 # New simulation recordings and local diagnostics
 /temp_frames_*/
 /sumo_debug.log
+
+# Isolated experiment runs produced by scripts/run_experiments.py
+/runs/
