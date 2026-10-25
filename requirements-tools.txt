@@ -1,3 +1,5 @@
 # Simulator executable and Excel writer used by setup and workflow scripts.
 eclipse-sumo==1.27.1
 openpyxl==3.1.5
+# Bimatrix Nash equilibria for the Nash Double-Q comparison.
+nashpy==0.0.43

@@ -38,6 +38,7 @@ def main():
         [str(bindir / ('sumo.exe' if os.name == 'nt' else 'sumo')), '--version'],
         [python, '-c', 'import torch, traci, cv2, pandas, openpyxl; '
          'from algorithms.mappo import MAPPO; from algorithms.z_merge import ZMergeAgent; '
+         'from algorithms.nash_double_q import NashDoubleQAgent; '
          'print("Training, simulation and spreadsheet imports passed")'],
     ]
     for command in commands:

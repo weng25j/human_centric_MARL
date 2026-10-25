@@ -68,6 +68,7 @@ class PipelineTests(unittest.TestCase):
             for module in ['training.train_traffic_shepherd', 'training.train_flat_marl', 'training.train_z_merge',
                            'evaluation.evaluate_traffic_shepherd', 'evaluation.evaluate_flat_marl',
                            'evaluation.evaluate_z_merge', 'evaluation.evaluate_rule_based',
+                           'training.train_nash_double_q', 'evaluation.evaluate_nash_double_q',
                            'analysis.combine_evaluation_reports']:
                 self.assertIn(module, text)
             self.assertFalse(destination.exists())

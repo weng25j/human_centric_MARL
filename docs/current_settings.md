@@ -120,3 +120,14 @@ No custom environment variable is mandatory if you activate the virtual environm
 - Z-Merge evaluation uses five episodes by default, up to 1,000 steps per episode at 0.1 seconds/step, randomized simulator seeds, and its existing route input. It does not expose the same demand/PR grid or report the same set of metrics. Its report omits demand, PR, seed count and confidence intervals; the export leaves those fields blank.
 - Fixed baselines use `safe_gap=25.0 m` and `smoothing_speed=15.0 m/s`. They have no learned parameters or training phase.
 - Main workflows run headlessly by default. The legacy experimental MA2C/RLlib prototypes remain outside the automatic pipeline because their integration is incomplete.
+
+
+## Nash Double-Q comparison
+
+The new non-Chen, game-theoretic comparison has independent settings and does not alter the methods above. See [its method guide](nash_double_q.md) for the publication, equations, simulator adaptations and exact-reproduction limits. `scripts/show_settings.py` reads its full `NashConfig` directly from source.
+
+- State 14 (two local six-feature observations and presence flags), three longitudinal actions (−1.5, 0, +1.5 m/s²), two separate 3×3 payoff matrices, hidden layers 128/128.
+- Nash equilibrium of the online game selects the expected target-critic payoff; mixed strategies are sampled with seeded randomness.
+- Gamma 0.99, Adam 3e−4, batch 64, replay 50,000, learning starts at 256 transitions, train every four simulator steps, hard target copy every 500 updates, reward scale 20, gradient clip 0.5.
+- Defaults: 3,000 training episodes × 1,000 steps, same demand/PR curriculum, and the existing evaluation grid/20 seeds × 4,000 steps. The controller handles up to five CAVs by default.
+- Pipeline options: `--nash-episodes`, `--nash-train-steps`, `--nash-eval-steps`, `--nash-eval-seeds`, and `--nash-model-dir`. No new custom environment variables or credentials are required. Dependency: `nashpy==0.0.43` in `requirements-tools.txt`.

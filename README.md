@@ -11,13 +11,27 @@ Every learned method below has its own training and evaluation program. Run them
 | **Traffic Shepherd (main novel method)** | [Human-centric environment/controller](environments/traffic_shepherd.py) with the [MAPPO learner](algorithms/mappo.py) | [`training.train_traffic_shepherd`](training/train_traffic_shepherd.py) | [`evaluation.evaluate_traffic_shepherd`](evaluation/evaluate_traffic_shepherd.py) |
 | Flat MAPPO / flat MARL | [MAPPO learner](algorithms/mappo.py) with the local-observation environment in its [trainer](training/train_flat_marl.py) | [`training.train_flat_marl`](training/train_flat_marl.py) | [`evaluation.evaluate_flat_marl`](evaluation/evaluate_flat_marl.py) |
 | Z-Merge | [Parameterized DQN agent](algorithms/z_merge.py) and [Z-Merge environment](environments/z_merge.py) | [`training.train_z_merge`](training/train_z_merge.py) | [`evaluation.evaluate_z_merge`](evaluation/evaluate_z_merge.py) |
+| Nash Double-Q (non-Chen comparison) | [Joint payoff critic and equilibrium solver](algorithms/nash_double_q.py) | [`training.train_nash_double_q`](training/train_nash_double_q.py) | [`evaluation.evaluate_nash_double_q`](evaluation/evaluate_nash_double_q.py) |
 | All-HDV, Rule-CAV, Selfish-CAV | [Non-learning baseline policies](algorithms/rule_based.py) | No training: fixed policies with no learned weights | [`evaluation.evaluate_rule_based`](evaluation/evaluate_rule_based.py), which evaluates all three |
 
 Traffic Shepherd's algorithm is split across its controller/environment and the shared MAPPO learner. Its human-centric observations, human-predictability tracking, neighbor fingerprints, semantic interventions, and reward calculations remain in `environments/traffic_shepherd.py`. Sharing the optimizer implementation with flat MAPPO does not replace Traffic Shepherd: the Shepherd workflow uses 14 observation features and 3 semantic actions, while flat MAPPO uses 6 features and 5 acceleration actions. Their training and evaluation programs remain separate.
 
-The reorganization preserves the logic of all four method families and their existing checkpoint formats. The separate experimental MA2C implementation and training prototype are also retained in `algorithms/ma2c.py` and `experiments/train_ma2c.py`; their integration remains experimental, as described below.
+The reorganization preserves the logic of the original four method families and their existing checkpoint formats. The separate experimental MA2C implementation and training prototype are also retained in `algorithms/ma2c.py` and `experiments/train_ma2c.py`; their integration remains experimental, as described below.
 
 Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Justin%20Weng_A%20Human-Centric%20MARL.pdf) and [poster](reports/documents/poster_JUSTIN_WENG_CUHK.pdf) describe the research. This is research code; the experimental prototypes have separate limitations listed below.
+
+## New game-theoretic comparison
+
+The [Nash Double-Q merging adaptation](docs/nash_double_q.md) adds a structurally different, non-Chen baseline based on Li et al.'s 2024 interactive-merging publication. It learns two vehicles' joint-action payoff matrices and selects a Nash equilibrium, including mixed strategies when necessary. It is not a flat MARL or PPO variant. The linked review explains the literature sources, equations, declared SUMO adaptations, settings, fairness limits, and the distinction from an exact paper reproduction.
+
+```bash
+# Refresh dependencies for the Nash equilibrium solver, then activate as below.
+python3.12 scripts/setup_environment.py
+source scripts/activate_environment.sh
+python scripts/run_experiments.py --methods nash_double_q --run-dir runs/nash_01
+```
+
+Existing Traffic Shepherd, flat MAPPO, Z-Merge and fixed-baseline implementations remain unchanged. Nash Double-Q is now included in the full pipeline by default; pass `--methods` explicitly to select only particular methods.
 
 ## Repository guide
 
@@ -25,7 +39,7 @@ Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Jus
 | --- | --- |
 | `algorithms/` | `mappo.py`: shared MAPPO implementation; `z_merge.py`: parameterized DQN; `rule_based.py`: baseline policies; `ma2c.py`: experimental actor-critic agent. |
 | `environments/` | `traffic_shepherd.py`: 14-feature human-centric controller; `z_merge.py`: 22-feature Z-Merge environment; `pettingzoo_on_ramp.py`: experimental parallel environment. |
-| `training/` | Curriculum training entry points for Traffic Shepherd, flat MARL, and Z-Merge. |
+| `training/` | Curriculum training entry points for Traffic Shepherd, flat MARL, Z-Merge, and Nash Double-Q. |
 | `evaluation/` | Checkpoint evaluation and metric collection; non-learning baseline benchmarks. |
 | `recording/` | SUMO GUI playback and MP4 recording for Shepherd and flat MARL. |
 | `analysis/` | Report aggregation, summary tables, comparison plots, and poster figures. |
@@ -36,6 +50,7 @@ Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Jus
 | `results/` | Existing Traffic Shepherd checkpoints/evaluations and non-learning baseline reports. |
 | `results_dongchen_baseline/` | Existing flat MARL checkpoints/evaluations, also labelled `DONGCHEN` in output filenames. |
 | `results_zmerge/` | Existing paired Z-Merge network weights and evaluation reports. |
+| `results_nash_double_q/` | New Nash Double-Q checkpoints, per-seed evaluation metrics, reports and traces. |
 | `reports/documents/`, `reports/figures/` | Research report/poster documents and previously exported presentation figures. |
 | `graphs_output/`, `comparison_charts/` | Existing generated metric and policy comparison charts. |
 | `combined_traffic_results.csv`, `combined_traffic_results.csv.xlsx` | Aggregated evaluation data and an existing spreadsheet export. |
@@ -76,14 +91,23 @@ See [current settings and environment variables](docs/current_settings.md) for f
 
 ## Run all methods and export a spreadsheet
 
-After activation, preview the commands, then run the pipeline:
+From the repository root after setup, launch **all supported training, evaluation, and spreadsheet-export stages** with:
+
+```bash
+source scripts/activate_environment.sh
+python scripts/run_experiments.py
+```
+
+No method or stage flags are required. A new timestamped folder under `runs/` stores the entire run. On Windows, activate `.venv` with PowerShell as shown above, then use the same Python command.
+
+To preview the commands or choose a named output folder:
 
 ```bash
 python scripts/run_experiments.py --run-dir runs/experiment_01 --dry-run
 python scripts/run_experiments.py --run-dir runs/experiment_01
 ```
 
-This serially trains and evaluates **Traffic Shepherd**, **flat MAPPO**, and **Z-Merge**, evaluates **All-HDV, Rule-CAV, and Selfish-CAV**, then combines evaluation outputs into:
+This serially trains and evaluates **Traffic Shepherd**, **flat MAPPO**, **Z-Merge**, and **Nash Double-Q**, evaluates **All-HDV, Rule-CAV, and Selfish-CAV**, then combines evaluation outputs into:
 
 - `runs/experiment_01/results/combined_traffic_results.xlsx`
 - `runs/experiment_01/results/combined_traffic_results.csv`
@@ -104,13 +128,13 @@ python scripts/run_experiments.py --methods shepherd --run-dir runs/shepherd_01 
   --eval-demands 800 --eval-prs 0.10
 ```
 
-`evaluate` automatically exports results. To use existing weights, supply `--shepherd-model-dir`, `--flat-model-dir`, and/or `--zmerge-model-prefix` with `--stage evaluate` and matching `--methods`. These paths are relative to the shell where you start the script; the runner makes them absolute. Use `--python PATH` if the intended virtual environment is not active. `--help` lists all options. The underlying evaluation seeds and step counts remain unchanged; narrowing the grid still runs all 20 MAPPO/baseline seeds.
+`evaluate` automatically exports results. To use existing weights, supply `--shepherd-model-dir`, `--flat-model-dir`, `--nash-model-dir`, and/or `--zmerge-model-prefix` with `--stage evaluate` and matching `--methods`. These paths are relative to the shell where you start the script; the runner makes them absolute. Use `--python PATH` if the intended virtual environment is not active. `--help` lists all options. The underlying evaluation seeds and step counts remain unchanged; narrowing the grid still runs all 20 MAPPO/baseline seeds.
 
 To combine **all existing evaluation data** without starting training:
 
 ```bash
 python -m analysis.combine_evaluation_reports \
-  --search-dirs results results_dongchen_baseline results_zmerge \
+  --search-dirs results results_dongchen_baseline results_zmerge results_nash_double_q \
   --output-csv reports/data/combined_traffic_results.csv \
   --output-xlsx reports/data/combined_traffic_results.xlsx
 ```
@@ -119,7 +143,7 @@ Workbook sheets contain a report-level summary, numeric metrics with separate co
 
 ## Training
 
-The three main trainers use curriculum traffic demand and CAV penetration rate (PR). Demand is vehicles/hour/lane; PR is a fraction such as `0.10` for 10%. The current defaults train for 3,000 episodes. Edit each module's `CONFIG` dictionary to change training length, rollout size, learning rates, or checkpoint interval. These settings are not CLI flags.
+The original three trainers use curriculum traffic demand and CAV penetration rate (PR). Demand is vehicles/hour/lane; PR is a fraction such as `0.10` for 10%. The current defaults train for 3,000 episodes. Edit each module's `CONFIG` dictionary to change training length, rollout size, learning rates, or checkpoint interval. These settings are not CLI flags for the original trainers. Nash Double-Q additionally exposes `--episodes` and `--max-steps`; its learner settings are listed in the [method guide](docs/nash_double_q.md).
 
 ```bash
 # Traffic Shepherd: 14 observation features, 3 semantic actions.
@@ -212,7 +236,7 @@ python -m analysis.plot_policy_comparisons
 python -m analysis.plot_evaluation_metrics
 ```
 
-The table goes to `reports/figures/comprehensive_results_table.png`; comparison charts go to `comparison_charts/`, and comprehensive metric plots to `graphs_output/`. The exporter writes a CSV and an Excel workbook. Its default search roots include all three existing results directories, including Z-Merge; use `--search-dirs` for custom runs. Default root output names are overwritten when explicitly rerun; use a separate output path to preserve earlier exports.
+The table goes to `reports/figures/comprehensive_results_table.png`; comparison charts go to `comparison_charts/`, and comprehensive metric plots to `graphs_output/`. The exporter writes a CSV and an Excel workbook. Its default search roots include the existing results directories plus `results_nash_double_q/`, including Z-Merge; use `--search-dirs` for custom runs. Default root output names are overwritten when explicitly rerun; use a separate output path to preserve earlier exports.
 
 Other analysis modules are specialized: `plot_training_rewards` expects `results/episode_rewards.npy`; `plot_safety_benchmarks` expects per-policy/per-seed arrays; `plot_speed_comparison` has explicit input path constants; `plot_success_vs_intervention` uses hardcoded poster values rather than recomputing experiment results. Inspect those inputs before using them for a new study.
 

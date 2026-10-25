@@ -10,8 +10,8 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-METHODS = ['shepherd', 'flat_mappo', 'z_merge', 'baselines']
-MODULES = {'shepherd': 'traffic_shepherd', 'flat_mappo': 'flat_marl', 'z_merge': 'z_merge'}
+METHODS = ['shepherd', 'flat_mappo', 'z_merge', 'nash_double_q', 'baselines']
+MODULES = {'shepherd': 'traffic_shepherd', 'flat_mappo': 'flat_marl', 'z_merge': 'z_merge', 'nash_double_q': 'nash_double_q'}
 
 
 def parse_args(argv=None):
@@ -27,6 +27,11 @@ def parse_args(argv=None):
     parser.add_argument('--shepherd-model-dir', type=Path)
     parser.add_argument('--flat-model-dir', type=Path)
     parser.add_argument('--zmerge-model-prefix', type=Path)
+    parser.add_argument('--nash-model-dir', type=Path)
+    parser.add_argument('--nash-episodes', type=int, default=3000)
+    parser.add_argument('--nash-train-steps', type=int, default=1000)
+    parser.add_argument('--nash-eval-steps', type=int, default=4000)
+    parser.add_argument('--nash-eval-seeds', help='Optional comma-separated seed subset for Nash evaluation')
     parser.add_argument('--dry-run', action='store_true', help='Print commands without creating files or running jobs')
     args = parser.parse_args(argv)
     if args.stage != 'all' and not args.run_dir:
@@ -45,10 +50,12 @@ def parse_args(argv=None):
 
 def model_location(args, method, run_dir):
     supplied = {'shepherd': args.shepherd_model_dir, 'flat_mappo': args.flat_model_dir,
-                'z_merge': args.zmerge_model_prefix}[method]
+                'z_merge': args.zmerge_model_prefix, 'nash_double_q': args.nash_model_dir}[method]
     if supplied:
         return supplied.expanduser().resolve()
     base = run_dir/'models'/method
+    if method == 'nash_double_q':
+        return base/'models'
     if method == 'shepherd':
         return base/'MAPPO_Curriculum_seed_0809/models'
     if method == 'flat_mappo':
@@ -72,7 +79,7 @@ def validate_weights(method, location):
             p.stem.startswith('checkpoint-') and p.stem[11:].isdigit() and int(p.stem[11:]) > 0
             for p in location.glob('checkpoint-*.pt')
         ):
-            raise FileNotFoundError(f'No numbered MAPPO checkpoint in {location}')
+            raise FileNotFoundError(f'No numbered checkpoint in {location}')
 
 
 def main(argv=None):
@@ -128,8 +135,10 @@ def main(argv=None):
                     if base.exists() and (any(base.rglob('*.pt')) or any(base.rglob('*.pth'))):
                         raise FileExistsError(f'Existing trained models in {base}; select a new run directory.')
                     base.mkdir(parents=True, exist_ok=True)
-                run(f'train_{method}', 'training.train_'+MODULES[method],
-                    ['--seed', args.seed, '--base-dir', str(base)+os.sep], cwd)
+                training_options = ['--seed', args.seed, '--base-dir', str(base)+os.sep]
+                if method == 'nash_double_q':
+                    training_options += ['--episodes', args.nash_episodes, '--max-steps', args.nash_train_steps]
+                run(f'train_{method}', 'training.train_'+MODULES[method], training_options, cwd)
             elif args.stage == 'train':
                 print('Baselines are fixed policies: no training required.', flush=True)
             if args.stage in ['all', 'evaluate']:
@@ -154,6 +163,10 @@ def main(argv=None):
                             model = copied
                     options = ['--model-prefix', os.path.relpath(model, cwd), '--episodes', args.zmerge_episodes] if method == 'z_merge' else [
                         '--model-dir', model, '--eval-lane-demands', args.eval_demands, '--eval-prs', args.eval_prs]
+                    if method == 'nash_double_q':
+                        options += ['--max-steps', args.nash_eval_steps]
+                        if args.nash_eval_seeds:
+                            options += ['--seeds', args.nash_eval_seeds]
                     run(f'evaluate_{method}', 'evaluation.evaluate_'+MODULES[method], options, cwd)
     if args.stage in ['all', 'evaluate', 'results']:
         run('results', 'analysis.combine_evaluation_reports',
