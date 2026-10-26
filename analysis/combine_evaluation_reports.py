@@ -5,7 +5,8 @@ import math
 from pathlib import Path
 import re
 
-DEFAULT_DIRECTORIES = ['results', 'results_dongchen_baseline', 'results_zmerge', 'results_nash_double_q']
+DEFAULT_DIRECTORIES = ['results', 'results_dongchen_baseline', 'results_zmerge', 'results_nash_double_q',
+                       'results_shepherd_v2']
 NUMBER = r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?|[-+]?(?:nan|inf)'
 HEADER = re.compile(r'^(.*?):\s*(\d+(?:\.\d+)?)\s*(?:veh/h/lane|vph)\s*\|\s*'
                     r'(\d+(?:\.\d+)?)%\s*PR\s*\(Over\s*(\d+)\s*Seeds\)', re.M)

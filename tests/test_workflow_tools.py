@@ -22,9 +22,9 @@ class SpreadsheetTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             (root/'report_shepherd.txt').write_text('TRAFFIC SHEPHERD: 800 veh/h/lane | 10% PR (Over 20 Seeds)\n'
-                'Mean Speed: 12.50 ± 0.75 m/s\nAvg Max Queue: 7.00 ± 1.00 vehicles\n')
+                'Mean Speed: 12.50 ± 0.75 m/s\nAvg Max Queue: 7.00 ± 1.00 vehicles\n', encoding='utf-8')
             (root/'run_evaluation_results.txt').write_text('FINAL Z-MERGE METHODOLOGY EVALUATION RESULTS\n'
-                'Traffic Efficiency (Avg Speed): 15.01 m/s\nAverage Queue Length: 1.78 vehicles/step\n')
+                'Traffic Efficiency (Avg Speed): 15.01 m/s\nAverage Queue Length: 1.78 vehicles/step\n', encoding='utf-8')
             np.save(root/'speed_array_SHEPHERD_800vph_10PR.npy', np.array([1.25, 2.5]))
             count = export_results([root, root], root/'out.csv', root/'out.xlsx')
             self.assertEqual(count, 2)
@@ -52,7 +52,7 @@ class SpreadsheetTests(unittest.TestCase):
     def test_report_text_is_not_an_excel_formula(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            (root/'report_example.txt').write_text('=FAKE: 800 veh/h/lane | 10% PR (Over 1 Seeds)\nMean Speed: 1 ± 0 m/s')
+            (root/'report_example.txt').write_text('=FAKE: 800 veh/h/lane | 10% PR (Over 1 Seeds)\nMean Speed: 1 ± 0 m/s', encoding='utf-8')
             export_results([root], root/'out.csv', root/'out.xlsx')
             book = load_workbook(root/'out.xlsx')
             self.assertEqual(book['summary']['A2'].data_type, 's')
@@ -60,6 +60,22 @@ class SpreadsheetTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_v2_is_opt_in_and_has_separate_modules_and_model_location(self):
+        self.assertNotIn('shepherd_v2', pipeline.parse_args([]).methods)
+        with tempfile.TemporaryDirectory() as td, patch('builtins.print') as output:
+            destination = Path(td)/'not_created'
+            args = pipeline.parse_args(['--dry-run', '--methods', 'shepherd_v2', '--run-dir', str(destination)])
+            self.assertEqual(pipeline.model_location(args, 'shepherd_v2', destination),
+                             destination/'models/shepherd_v2/models')
+            pipeline.main(['--dry-run', '--methods', 'shepherd_v2', '--run-dir', str(destination),
+                           '--v2-episodes', '1', '--v2-train-steps', '500', '--v2-eval-seeds', '0,25'])
+            text = '\n'.join(str(c) for c in output.call_args_list)
+            self.assertIn('training.train_traffic_shepherd_v2', text)
+            self.assertIn('evaluation.evaluate_traffic_shepherd_v2', text)
+            self.assertIn('analysis.combine_evaluation_reports', text)
+            self.assertNotIn('training.train_traffic_shepherd ', text)
+            self.assertFalse(destination.exists())
+
     def test_dry_run_lists_all_methods_and_export_without_writing(self):
         with tempfile.TemporaryDirectory() as td, patch('builtins.print') as output:
             destination = Path(td)/'not_created'

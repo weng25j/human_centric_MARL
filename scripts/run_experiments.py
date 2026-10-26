@@ -10,14 +10,16 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-METHODS = ['shepherd', 'flat_mappo', 'z_merge', 'nash_double_q', 'baselines']
-MODULES = {'shepherd': 'traffic_shepherd', 'flat_mappo': 'flat_marl', 'z_merge': 'z_merge', 'nash_double_q': 'nash_double_q'}
+DEFAULT_METHODS = ['shepherd', 'flat_mappo', 'z_merge', 'nash_double_q', 'baselines']
+METHODS = DEFAULT_METHODS + ['shepherd_v2']
+MODULES = {'shepherd': 'traffic_shepherd', 'flat_mappo': 'flat_marl', 'z_merge': 'z_merge',
+           'nash_double_q': 'nash_double_q', 'shepherd_v2': 'traffic_shepherd_v2'}
 
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--stage', choices=['all', 'train', 'evaluate', 'results'], default='all')
-    parser.add_argument('--methods', nargs='+', choices=METHODS, default=METHODS)
+    parser.add_argument('--methods', nargs='+', choices=METHODS, default=DEFAULT_METHODS)
     parser.add_argument('--run-dir', default=os.environ.get('MARL_RUN_DIR'))
     parser.add_argument('--seed', type=int, default=int(os.environ.get('MARL_SEED', '42')))
     parser.add_argument('--eval-demands', default=os.environ.get('MARL_EVAL_DEMANDS', '800,1700'))
@@ -32,12 +34,25 @@ def parse_args(argv=None):
     parser.add_argument('--nash-train-steps', type=int, default=1000)
     parser.add_argument('--nash-eval-steps', type=int, default=4000)
     parser.add_argument('--nash-eval-seeds', help='Optional comma-separated seed subset for Nash evaluation')
+    parser.add_argument('--v2-model-dir', type=Path)
+    parser.add_argument('--v2-episodes', type=int, default=3000)
+    parser.add_argument('--v2-train-steps', type=int, default=1000)
+    parser.add_argument('--v2-eval-steps', type=int, default=4000)
+    parser.add_argument('--v2-eval-seeds', help='Optional comma-separated seed subset for Shepherd 2.0')
+    parser.add_argument('--v2-scenario', choices=['ramp', 'lane_drop'])
+    parser.add_argument('--v2-hdv-mixture', choices=['default', 'cautious', 'aggressive'])
+    parser.add_argument('--v2-ablation', choices=['full', 'no_fairness', 'no_stability', 'no_control_cost', 'primitive_actions'])
     parser.add_argument('--dry-run', action='store_true', help='Print commands without creating files or running jobs')
     args = parser.parse_args(argv)
     if args.stage != 'all' and not args.run_dir:
         parser.error('--run-dir is required for separate stages')
     if args.zmerge_episodes < 1:
         parser.error('--zmerge-episodes must be positive')
+    if 'shepherd_v2' in args.methods:
+        if min(args.v2_episodes, args.v2_train_steps, args.v2_eval_steps) < 1:
+            parser.error('Shepherd 2.0 episode and step counts must be positive')
+        if args.stage == 'evaluate' and args.v2_ablation:
+            parser.error('The evaluation ablation is read from the checkpoint; --v2-ablation is a training option')
     try:
         if any(int(x) <= 0 for x in args.eval_demands.split(',')):
             raise ValueError()
@@ -50,11 +65,12 @@ def parse_args(argv=None):
 
 def model_location(args, method, run_dir):
     supplied = {'shepherd': args.shepherd_model_dir, 'flat_mappo': args.flat_model_dir,
-                'z_merge': args.zmerge_model_prefix, 'nash_double_q': args.nash_model_dir}[method]
+                'z_merge': args.zmerge_model_prefix, 'nash_double_q': args.nash_model_dir,
+                'shepherd_v2': args.v2_model_dir}[method]
     if supplied:
         return supplied.expanduser().resolve()
     base = run_dir/'models'/method
-    if method == 'nash_double_q':
+    if method in ('nash_double_q', 'shepherd_v2'):
         return base/'models'
     if method == 'shepherd':
         return base/'MAPPO_Curriculum_seed_0809/models'
@@ -138,6 +154,12 @@ def main(argv=None):
                 training_options = ['--seed', args.seed, '--base-dir', str(base)+os.sep]
                 if method == 'nash_double_q':
                     training_options += ['--episodes', args.nash_episodes, '--max-steps', args.nash_train_steps]
+                if method == 'shepherd_v2':
+                    training_options += ['--episodes', args.v2_episodes, '--max-steps', args.v2_train_steps]
+                    for flag, value in [('--scenario', args.v2_scenario), ('--hdv-mixture', args.v2_hdv_mixture),
+                                        ('--ablation', args.v2_ablation)]:
+                        if value:
+                            training_options += [flag, value]
                 run(f'train_{method}', 'training.train_'+MODULES[method], training_options, cwd)
             elif args.stage == 'train':
                 print('Baselines are fixed policies: no training required.', flush=True)
@@ -167,6 +189,12 @@ def main(argv=None):
                         options += ['--max-steps', args.nash_eval_steps]
                         if args.nash_eval_seeds:
                             options += ['--seeds', args.nash_eval_seeds]
+                    if method == 'shepherd_v2':
+                        options += ['--max-steps', args.v2_eval_steps]
+                        for flag, value in [('--seeds', args.v2_eval_seeds), ('--scenario', args.v2_scenario),
+                                            ('--hdv-mixtures', args.v2_hdv_mixture)]:
+                            if value:
+                                options += [flag, value]
                     run(f'evaluate_{method}', 'evaluation.evaluate_'+MODULES[method], options, cwd)
     if args.stage in ['all', 'evaluate', 'results']:
         run('results', 'analysis.combine_evaluation_reports',

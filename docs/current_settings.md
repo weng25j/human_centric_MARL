@@ -131,3 +131,15 @@ The new non-Chen, game-theoretic comparison has independent settings and does no
 - Gamma 0.99, Adam 3e−4, batch 64, replay 50,000, learning starts at 256 transitions, train every four simulator steps, hard target copy every 500 updates, reward scale 20, gradient clip 0.5.
 - Defaults: 3,000 training episodes × 1,000 steps, same demand/PR curriculum, and the existing evaluation grid/20 seeds × 4,000 steps. The controller handles up to five CAVs by default.
 - Pipeline options: `--nash-episodes`, `--nash-train-steps`, `--nash-eval-steps`, `--nash-eval-seeds`, and `--nash-model-dir`. No new custom environment variables or credentials are required. Dependency: `nashpy==0.0.43` in `requirements-tools.txt`.
+
+## Traffic Shepherd 2.0 (separate opt-in method)
+
+The [2.0 guide](traffic_shepherd_v2.md) documents all features, reward components, controller equations, scenarios, ablations and commands. None of the existing settings above changes.
+
+- Local actor input 42, centralized critic input 54, five semantic actions; separate two-layer 256-wide tanh networks.
+- Adam actor LR 3e-4, critic LR 1e-3, gamma 0.99, GAE lambda 0.95, PPO clip 0.2, entropy 0.01, gradient clip 0.5, four epochs, batch 256, on-policy rollout 256 simulator steps, reward scale 20.
+- Own full team reward with efficiency/safety/stability/fairness/control weights 1/10/5/0.5/0.1 and extra own-collision penalty 10. Original reward functions are unchanged.
+- Default five-CAV budget, 0.1 s simulator step, 3,000 × 1,000-step training, same curriculum values; same evaluation grid/20 seeds × 4,000 steps.
+- Ramp default copies existing inputs. Lane-drop generation, HDV-mixture changes and ablations are explicit 2.0 options. SUMO safety mode 31; native lane changing remains enabled.
+- Runner: `--methods shepherd_v2`; 2.0 is excluded from the previous no-flags method list. No new dependency pins or mandatory environment variables. `SHEPHERD_V2_SUMO_TESTS=1` enables optional live simulator tests.
+- `scripts/show_settings.py` reports `effective_traffic_shepherd_v2_learner` directly from the new configuration class.

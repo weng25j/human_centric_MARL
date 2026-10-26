@@ -29,6 +29,9 @@ def get_settings():
     nash_tree = ast.parse((ROOT/'algorithms/nash_double_q.py').read_text())
     nash_class = next(node for node in nash_tree.body if isinstance(node, ast.ClassDef) and node.name == 'NashConfig')
     nash_config = {node.target.id: ast.literal_eval(node.value) for node in nash_class.body if isinstance(node, ast.AnnAssign)}
+    v2_tree = ast.parse((ROOT/'algorithms/traffic_shepherd_v2.py').read_text(encoding='utf-8'))
+    v2_class = next(node for node in v2_tree.body if isinstance(node, ast.ClassDef) and node.name == 'ShepherdConfig')
+    v2_config = {node.target.id: ast.literal_eval(node.value) for node in v2_class.body if isinstance(node, ast.AnnAssign)}
     versions = {}
     for name in ['torch', 'numpy', 'gymnasium', 'pettingzoo', 'sumolib', 'traci',
                  'eclipse-sumo', 'pandas', 'openpyxl', 'nashpy']:
@@ -44,6 +47,7 @@ def get_settings():
                            325,350,375,400,425,450,475,500,525,550,575],
                            'z_merge_steps': 1000, 'z_merge_episodes': 5, 'step_seconds': 0.1},
             'effective_nash_double_q_learner': nash_config,
+            'effective_traffic_shepherd_v2_learner': v2_config,
             'effective_z_merge_learner': {'replay_capacity': 100000, 'gamma': 0.995,
                 'q_lr': 0.0001, 'parameter_lr': 0.0001, 'target_update_steps': 35000,
                 'hidden_layers': [256,512,512,128]},

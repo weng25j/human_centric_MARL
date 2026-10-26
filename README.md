@@ -20,6 +20,18 @@ The reorganization preserves the logic of the original four method families and 
 
 Author: Justin Weng, CUHK. The [project report](reports/documents/1155282333_Justin%20Weng_A%20Human-Centric%20MARL.pdf) and [poster](reports/documents/poster_JUSTIN_WENG_CUHK.pdf) describe the research. This is research code; the experimental prototypes have separate limitations listed below.
 
+## Traffic Shepherd 2.0
+
+[Traffic Shepherd 2.0](docs/traffic_shepherd_v2.md) implements the original research plan as a separate SUMO/TraCI controller: five semantic roles, a local shared PPO actor with a centralized training critic, full efficiency/safety/stability/fairness/control-cost rewards, optional lane-drop and HDV-mixture transfer tests, and reward/action ablations. It has independent [training](training/train_traffic_shepherd_v2.py), [evaluation](evaluation/evaluate_traffic_shepherd_v2.py), checkpoints and regression tests. The original Traffic Shepherd and every existing comparison retain their implementations and settings.
+
+After environment setup, train, evaluate and export 2.0 with:
+
+```bash
+python scripts/run_experiments.py --methods shepherd_v2 --run-dir runs/shepherd_v2_01
+```
+
+The existing no-flags runner keeps its previous default methods; 2.0 is opt-in. See the [2.0 guide](docs/traffic_shepherd_v2.md) for architecture, exact features/reward, commands, resume, ablations, outputs, live SUMO tests and research limitations.
+
 ## New game-theoretic comparison
 
 The [Nash Double-Q merging adaptation](docs/nash_double_q.md) adds a structurally different, non-Chen baseline based on Li et al.'s 2024 interactive-merging publication. It learns two vehicles' joint-action payoff matrices and selects a Nash equilibrium, including mixed strategies when necessary. It is not a flat MARL or PPO variant. The linked review explains the literature sources, equations, declared SUMO adaptations, settings, fairness limits, and the distinction from an exact paper reproduction.
