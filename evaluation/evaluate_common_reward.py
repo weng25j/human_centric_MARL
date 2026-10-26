@@ -18,6 +18,7 @@ from common.merging_metrics import MergingMetrics, REPORT_METRICS, mean_ci
 from environments.common_reward_merge import CommonRewardMergeEnv, Observer, controls_for
 from environments.shepherd_v2_scenarios import MIXTURES, prepare_scenario
 from evaluation.evaluate_traffic_shepherd_v2 import DEFAULT_SEEDS
+from recording.live_sumo import VideoPlan, add_video_arguments, validate_video_arguments
 
 
 def main(argv=None, method=None):
@@ -32,7 +33,9 @@ def main(argv=None, method=None):
     parser.add_argument('--scenario', choices=('ramp', 'lane_drop'), default='ramp')
     parser.add_argument('--hdv-mixtures', nargs='+', choices=MIXTURES, default=['default'])
     parser.add_argument('--gui', action='store_true')
+    add_video_arguments(parser)
     args = parser.parse_args(argv)
+    validate_video_arguments(parser, args)
     if method is not None and args.method != method:
         parser.error(f'This entry point evaluates {method}')
     try:
@@ -67,6 +70,7 @@ def main(argv=None, method=None):
                 'scenario': args.scenario, 'hdv_mixtures': args.hdv_mixtures, 'evaluation_seeds': seeds,
                 'evaluation_steps': args.max_steps, 'max_controlled_cavs': 5}
     (output/'evaluation_settings.json').write_text(json.dumps(settings, default=str, indent=2), encoding='utf-8')
+    videos = VideoPlan(args, output/'recordings', args.method, 'evaluation')
     for mixture in args.hdv_mixtures:
         for demand in demands:
             for pr in prs:
@@ -76,7 +80,12 @@ def main(argv=None, method=None):
                     np.random.seed(seed)
                     torch.manual_seed(seed)
                     network, routes = prepare_scenario(output/'workspace', demand, pr, args.scenario, mixture)
-                    env = CommonRewardMergeEnv(network, routes, seed, args.gui, scenario=args.scenario)
+                    recording = videos.next(f'evaluation_{args.scenario}_{mixture}_d{demand}_pr{pr:g}_seed{seed}', args.max_steps,
+                        seed=seed, demand=demand, pr=pr, scenario=args.scenario, hdv_mixture=mixture,
+                        checkpoint=str(args.model_dir) if args.model_dir else None,
+                        checkpoint_episode=checkpoint['episode'], learner_updates=0)
+                    env = CommonRewardMergeEnv(network, routes, seed, args.gui, scenario=args.scenario,
+                                               recording=recording)
                     observer, collector = Observer(args.method), MergingMetrics(env.connection)
                     counts, total, requested, decisions = np.zeros(5, int), 0., 0, 0
                     parts, hdv = dict.fromkeys(env.last_parts, 0.), {}

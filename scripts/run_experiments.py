@@ -12,6 +12,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from common.benchmark_methods import METHODS as COMMON_METHODS, FIXED as COMMON_FIXED, LEARNED as COMMON_LEARNED
+from recording.live_sumo import add_video_arguments, validate_video_arguments
 
 DEFAULT_METHODS = ['shepherd', 'flat_mappo', 'z_merge', 'nash_double_q', 'baselines']
 METHODS = DEFAULT_METHODS + ['shepherd_v2'] + list(COMMON_METHODS)
@@ -53,11 +54,17 @@ def parse_args(argv=None):
     parser.add_argument('--common-eval-seeds', help='Optional comma-separated seed subset for common-reward evaluation')
     parser.add_argument('--common-scenario', choices=['ramp', 'lane_drop'], default='ramp')
     parser.add_argument('--common-hdv-mixture', choices=['default', 'cautious', 'aggressive'], default='default')
+    parser.add_argument('--record-training', action='store_true', help='Record live training for common-suite/Shepherd 2.0 methods')
+    parser.add_argument('--record-evaluation', action='store_true', help='Record live evaluation for common-suite/Shepherd 2.0 methods')
+    add_video_arguments(parser, include_switch=False)
     parser.add_argument('--dry-run', action='store_true', help='Print commands without creating files or running jobs')
     args = parser.parse_args(argv)
+    validate_video_arguments(parser, args)
     args.methods = args.methods or (list(COMMON_METHODS) if args.suite == 'common' else DEFAULT_METHODS)
     if args.suite == 'common' and any(m not in COMMON_METHODS for m in args.methods):
         parser.error('The common suite accepts only *_common methods; legacy rewards are separate')
+    if (args.record_training or args.record_evaluation) and any(m not in (*COMMON_METHODS, 'shepherd_v2') for m in args.methods):
+        parser.error('Runner video flags support --suite common or --methods shepherd_v2. Legacy recording entry points remain available.')
     if args.stage != 'all' and not args.run_dir:
         parser.error('--run-dir is required for separate stages')
     if args.zmerge_episodes < 1:
@@ -131,6 +138,8 @@ def main(argv=None):
     env.setdefault('MPLCONFIGDIR', str(ROOT/'.cache/matplotlib'))
     env.setdefault('PYTHONDONTWRITEBYTECODE', '1')
     print(f'Run directory: {run_dir}', flush=True)
+    video_options = ['--record-video', '--video-runs', args.video_runs,
+                     '--video-max-steps', args.video_max_steps, '--video-every', args.video_every]
 
     def run(label, module, arguments, cwd):
         command = [python, '-m', module, *map(str, arguments)]
@@ -184,6 +193,8 @@ def main(argv=None):
                         if value:
                             training_options += [flag, value]
                 module = 'training.train_common_reward' if method in COMMON_LEARNED else 'training.train_'+MODULES[method]
+                if args.record_training:
+                    training_options += video_options
                 run(f'train_{method}', module, training_options, cwd)
             elif args.stage == 'train':
                 print('Baselines are fixed policies: no training required.', flush=True)
@@ -193,6 +204,8 @@ def main(argv=None):
                     '--eval-lane-demands', args.eval_demands, '--eval-prs', args.eval_prs]
                 if args.common_eval_seeds:
                     common_options += ['--seeds', args.common_eval_seeds]
+                if args.record_evaluation and method in COMMON_METHODS:
+                    common_options += video_options
                 if method in COMMON_FIXED:
                     # Fixed policies have no checkpoint; still use isolated outputs.
                     common_options += ['--output-dir', run_dir/'evaluation'/method/datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')]
@@ -230,6 +243,8 @@ def main(argv=None):
                                 options += [flag, value]
                     if method in COMMON_LEARNED:
                         options = [*common_options, '--model-dir', model, '--output-dir', model/'reports']
+                    if args.record_evaluation and method == 'shepherd_v2':
+                        options += video_options
                     module = 'evaluation.evaluate_common_reward' if method in COMMON_LEARNED else 'evaluation.evaluate_'+MODULES[method]
                     run(f'evaluate_{method}', module, options, cwd)
     if args.stage in ['all', 'evaluate', 'results']:

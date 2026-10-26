@@ -58,7 +58,7 @@ class TrafficShepherdV2Env:
     simulator step; repeatedly reading them cannot change temporal uncertainty.
     """
     def __init__(self, network, routes, seed=42, gui=False, max_controlled=5,
-                 reward_config=None, action_mode='structured', scenario='ramp'):
+                 reward_config=None, action_mode='structured', scenario='ramp', recording=None):
         if max_controlled < 0 or action_mode not in ('structured', 'primitive'):
             raise ValueError('Invalid control budget or action mode')
         self.max_controlled, self.reward_config = max_controlled, reward_config or RewardConfig()
@@ -72,12 +72,23 @@ class TrafficShepherdV2Env:
         bottleneck = 'E1' if scenario == 'ramp' else 'merge_zone'
         self.bottleneck_x = self.road.getEdge(bottleneck).getFromNode().getCoord()[0]
         self.label = 'shepherd-v2-'+uuid.uuid4().hex
-        traci.start(['sumo-gui' if gui else 'sumo', '-n', str(network), '-r', str(routes),
-                     '--seed', str(seed), '--step-length', str(self.dt), '--no-step-log', 'true',
-                     '--collision.action', 'remove', '--collision.check-junctions', 'true',
-                     '--collision.mingap-factor', '0.0'], label=self.label)
-        self.connection = traci.getConnection(self.label)
-        self.states = self._snapshot()
+        self.recording = recording
+        gui_options = recording.sumo_options() if recording else (['--start', '--quit-on-end'] if gui else [])
+        try:
+            traci.start(['sumo-gui' if gui or recording else 'sumo', '-n', str(network), '-r', str(routes),
+                         '--seed', str(seed), '--step-length', str(self.dt), '--no-step-log', 'true',
+                         '--collision.action', 'remove', '--collision.check-junctions', 'true',
+                         '--collision.mingap-factor', '0.0', *gui_options], label=self.label)
+            self.connection = traci.getConnection(self.label)
+            if recording:
+                recording.connected(self.connection)
+            self.states = self._snapshot()
+        except BaseException:
+            if recording:
+                if hasattr(self, 'connection'):
+                    recording.close_connection(self.connection)
+                recording.release_gui()
+            raise
 
     def _snapshot(self):
         v, states = self.connection.vehicle, {}
@@ -220,7 +231,13 @@ class TrafficShepherdV2Env:
         # Team reward makes macroscopic HDV outcomes part of every CAV's return.
         # Explicit own collision penalty survives SUMO removing the agent.
         rewards = {n: reward-(10.0 if n in self.collisions else 0.0) for n in actions}
+        if getattr(self, 'recording', None):
+            self.recording.after_step(self)
         return self.observe(), rewards
 
     def close(self):
-        self.connection.close()
+        if getattr(self, 'recording', None):
+            self.recording.close_connection(self.connection)
+            self.recording.finish()
+        else:
+            self.connection.close()

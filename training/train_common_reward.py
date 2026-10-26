@@ -12,6 +12,7 @@ from algorithms.common_reward_agents import make_agent
 from common.benchmark import LEARNED, reward_contract
 from environments.common_reward_merge import CommonRewardMergeEnv, Observer, controls_for
 from environments.shepherd_v2_scenarios import MIXTURES, prepare_scenario
+from recording.live_sumo import VideoPlan, add_video_arguments, validate_video_arguments
 
 CONFIG = {'MAX_EPISODES': 3000, 'MAX_STEPS': 1000, 'checkpoint_interval': 50}
 
@@ -28,7 +29,9 @@ def main(argv=None, method=None):
     parser.add_argument('--resume', type=Path)
     parser.add_argument('--audit-reward', action='store_true')
     parser.add_argument('--gui', action='store_true')
+    add_video_arguments(parser)
     args = parser.parse_args(argv)
+    validate_video_arguments(parser, args)
     if method is not None and args.method != method:
         parser.error(f'This entry point trains {method}')
     if args.episodes < 1 or args.max_steps < 1:
@@ -53,13 +56,18 @@ def main(argv=None, method=None):
                 'resume_replay': 'Replay is not stored; off-policy resumes refill replay before learning.'}
     (base/'training_settings.json').write_text(json.dumps(settings, default=str, indent=2), encoding='utf-8')
     audit = (base/'reward_audit.jsonl').open('a', encoding='utf-8') if args.audit_reward else None
+    videos = VideoPlan(args, base/'recordings', args.method, 'training')
     try:
         for episode in range(first, args.episodes):
             rng = random.Random(args.seed+episode)
             demand = 800 if episode < 1000 else rng.choice([800, 1200] if episode < 2000 else [800, 1200, 1700])
             pr = .20 if episode < 1000 else .10 if episode < 2000 else rng.choice([.05, .10, .20])
             network, routes = prepare_scenario(base/'workspace', demand, pr, args.scenario, args.hdv_mixture)
-            env = CommonRewardMergeEnv(network, routes, args.seed+episode, args.gui, scenario=args.scenario)
+            recording = videos.next(f'training_episode{episode+1}_seed{args.seed+episode}', args.max_steps,
+                episode=episode+1, seed=args.seed+episode, demand=demand, pr=pr,
+                scenario=args.scenario, hdv_mixture=args.hdv_mixture)
+            env = CommonRewardMergeEnv(network, routes, args.seed+episode, args.gui, scenario=args.scenario,
+                                       recording=recording)
             observer = Observer(args.method)
             epsilon = max(.05, .99*.995**episode)
             total, losses, action_count, parts = 0., [], np.zeros(5, int), dict.fromkeys(env.last_parts, 0.)
@@ -74,6 +82,8 @@ def main(argv=None, method=None):
                     env.step(controls, policies)
                     following = observer.capture(env)
                     loss = agent.observe(frame, decision, env.team_reward, following, step, final=step+1 == args.max_steps)
+                    if recording:
+                        recording.note_learning(agent.updates-updates, agent.transitions-transitions)
                     if loss:
                         losses.append(loss)
                     total += env.team_reward
@@ -88,6 +98,9 @@ def main(argv=None, method=None):
                             'controlled_count': len(controls)})+'\n')
                     frame = following
             finally:
+                if recording:
+                    recording.metadata.update(learner_updates=agent.updates-updates,
+                        transitions=agent.transitions-transitions)
                 env.close()
             record = {'method': args.method, 'episode': episode+1, 'demand': demand, 'pr': pr,
                 'team_return': total, 'transitions': agent.transitions-transitions, 'updates': agent.updates-updates,

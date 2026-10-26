@@ -13,7 +13,7 @@ The command prints only an explicit list of project settings, package versions, 
 - Python 3.12; verified with 3.12.14 on Linux x86-64.
 - CPU PyTorch 2.13.0, NumPy 2.2.6, pandas 2.3.3, Gymnasium 1.2.2, PettingZoo 1.26.1, SUMO/TraCI/sumolib 1.27.1.
 - Additional workflow tools: `eclipse-sumo==1.27.1` supplies the simulator, and `openpyxl==3.1.5` writes Excel workbooks. These are pinned in `requirements-tools.txt`; original library pins remain in the UTF-16 `requirements.txt`.
-- Linux is tested. The Python setup/runner scripts also use Windows-compatible paths; Windows execution and GUI recording have not been tested here.
+- Linux is tested. Windows execution is also verified with Python 3.10.20, CPU PyTorch 2.13.0 and SUMO 1.27.1, including live GUI training/evaluation recording; see the [recording guide](live_sumo_recording.md).
 - No API keys, credentials, database, or remote training service are needed. Installation needs the package indexes; execution needs local SUMO/TraCI socket access. GPU support is optional and requires the appropriate PyTorch wheel and driver.
 
 ## Environment variables
@@ -40,6 +40,15 @@ No custom environment variable is mandatory if you activate the virtual environm
 `MARL_*` workflow variables are read by the new scripts, not the original training/evaluation modules. Threading/backend settings affect runtime, not training hyperparameters. `PYTHONHASHSEED` is not set by the helper; the main trainers already seed Python `random`, NumPy, and PyTorch through `--seed`.
 
 ## Training defaults
+
+Live MP4 recording is opt-in for standalone Shepherd 2.0 and the common suite.
+`--record-video` enables a GUI only for selected runs; runner equivalents are
+`--record-training` / `--record-evaluation`. Defaults: first run per invocation,
+1,000-step capture cap, one frame per 0.1-second simulation step, 10 FPS,
+1280×720 output. `--video-runs`, `--video-max-steps`, and `--video-every` adjust
+capture without changing the experiment horizon or learner settings. A 25 ms
+GUI delay and 50 ms per-step GUI event-loop wait affect wall time only.
+See [details and tests](live_sumo_recording.md).
 
 ### `train_flat_marl`
 

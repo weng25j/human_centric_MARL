@@ -60,6 +60,17 @@ class SpreadsheetTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_video_options_reach_common_and_v2_trainers_and_evaluators(self):
+        for selection in (['--suite', 'common'], ['--methods', 'shepherd_v2']):
+            with tempfile.TemporaryDirectory() as td, patch('builtins.print') as output:
+                pipeline.main([*selection, '--dry-run', '--run-dir', td, '--record-training',
+                               '--record-evaluation', '--video-runs', '2', '--video-max-steps', '120', '--video-every', '2'])
+                commands = [str(c.args[0]) for c in output.call_args_list if ' -m training.' in str(c) or ' -m evaluation.' in str(c)]
+                self.assertTrue(commands)
+                self.assertTrue(all('--record-video --video-runs 2 --video-max-steps 120 --video-every 2' in c for c in commands))
+        with patch('sys.stderr'), self.assertRaises(SystemExit):
+            pipeline.parse_args(['--record-training'])
+
     def test_common_suite_includes_every_method_and_keeps_legacy_rewards_separate(self):
         args = pipeline.parse_args(['--suite', 'common'])
         self.assertEqual(set(args.methods), set(pipeline.COMMON_METHODS))

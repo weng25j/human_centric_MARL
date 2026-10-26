@@ -1,5 +1,10 @@
 # Traffic Shepherd 2.0
 
+Live SUMO recording is supported during training and checkpoint evaluation:
+use `--record-video` on either program, or `--record-training --record-evaluation`
+on the runner. The [recording guide](live_sumo_recording.md) explains clip
+selection, MP4/metadata output and real GUI tests.
+
 Traffic Shepherd 2.0 is a separate implementation of the supplied **Traffic-Shepherd-Short-Paper-en.pdf** research plan. It implements sparse CAV control through five interpretable traffic roles, centralized training with decentralized execution (CTDE), and a reward covering efficiency, safety, stability, HDV fairness, and intervention cost. It uses real **SUMO and TraCI**, not a surrogate simulator.
 
 For reward-matched comparisons against Z-Merge, Trust-MARL, MA2C, QMIX, MAAC and the existing controls, use the newer [common-reward suite](common_reward_comparisons.md): `python scripts/run_experiments.py --suite common`. It retrains `shepherd_v2_common` with the same actor/critic design and a scalar equal to the mean of this version's per-CAV rewards. The standalone workflow below remains available with its original reward/checkpoints.

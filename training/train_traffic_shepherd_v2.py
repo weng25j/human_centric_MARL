@@ -10,6 +10,7 @@ import numpy as np
 from algorithms.traffic_shepherd_v2 import TrafficShepherdV2
 from environments.traffic_shepherd_v2 import RewardConfig, TrafficShepherdV2Env
 from environments.shepherd_v2_scenarios import MIXTURES, prepare_scenario
+from recording.live_sumo import VideoPlan, add_video_arguments, validate_video_arguments
 
 CONFIG = {'MAX_EPISODES': 3000, 'MAX_STEPS': 1000, 'checkpoint_interval': 50}
 ABLATIONS = ('full', 'no_fairness', 'no_stability', 'no_control_cost', 'primitive_actions')
@@ -44,7 +45,9 @@ def main(argv=None):
     parser.add_argument('--ablation', choices=ABLATIONS)
     parser.add_argument('--max-controlled-cavs', type=int, help='Default 5; 0 controls all CAVs')
     parser.add_argument('--gui', action='store_true')
+    add_video_arguments(parser)
     args = parser.parse_args(argv)
+    validate_video_arguments(parser, args)
     if args.episodes < 1 or args.max_steps < 1 or (args.max_controlled_cavs is not None and args.max_controlled_cavs < 0):
         parser.error('Episodes/steps must be positive and control budget non-negative')
     base = args.base_dir.expanduser().resolve()
@@ -71,14 +74,18 @@ def main(argv=None):
     metadata = {'method': 'traffic_shepherd_v2', 'arguments': vars(args), 'experiment': experiment,
                 'learner': asdict(agent.config), 'training': CONFIG, 'step_seconds': 0.1}
     (base/'training_settings.json').write_text(json.dumps(metadata, default=str, indent=2), encoding='utf-8')
+    videos = VideoPlan(args, base/'recordings', 'traffic_shepherd_v2', 'training')
     for episode in range(first, args.episodes):
         rng = random.Random(args.seed+episode)
         demand = 800 if episode < 1000 else rng.choice([800, 1200] if episode < 2000 else [800, 1200, 1700])
         pr = 0.20 if episode < 1000 else 0.10 if episode < 2000 else rng.choice([0.05, 0.10, 0.20])
         network, routes = prepare_scenario(base/'workspace', demand, pr, experiment['scenario'], experiment['hdv_mixture'])
+        recording = videos.next(f'training_episode{episode+1}_seed{args.seed+episode}', args.max_steps,
+            episode=episode+1, seed=args.seed+episode, demand=demand, pr=pr,
+            scenario=experiment['scenario'], hdv_mixture=experiment['hdv_mixture'])
         env = TrafficShepherdV2Env(network, routes, args.seed+episode, args.gui,
             max_controlled=experiment['max_controlled_cavs'], reward_config=RewardConfig(**experiment['reward']),
-            action_mode=experiment['action_mode'], scenario=experiment['scenario'])
+            action_mode=experiment['action_mode'], scenario=experiment['scenario'], recording=recording)
         rows, losses = [], []
         reward_sum, samples = 0.0, 0
         roles = np.zeros(5, int)
@@ -111,8 +118,12 @@ def main(argv=None):
                     if loss:
                         losses.append(loss)
                     rows.clear()  # strictly on-policy: never replay an old rollout
+                if recording:
+                    recording.note_learning(agent.updates-initial_updates, samples)
                 observations, global_state = next_observations, next_global
         finally:
+            if recording:
+                recording.metadata.update(learner_updates=agent.updates-initial_updates, transitions=samples)
             env.close()
         record = {'episode': episode+1, 'demand': demand, 'pr': pr, 'reward': reward_sum,
                   'samples': samples, 'updates': agent.updates-initial_updates, 'role_counts': roles.tolist(),

@@ -14,6 +14,7 @@ from algorithms.traffic_shepherd_v2 import ACTION_NAMES, TrafficShepherdV2
 from common.merging_metrics import MergingMetrics, REPORT_METRICS, mean_ci
 from environments.traffic_shepherd_v2 import RewardConfig, TrafficShepherdV2Env
 from environments.shepherd_v2_scenarios import MIXTURES, prepare_scenario
+from recording.live_sumo import VideoPlan, add_video_arguments, validate_video_arguments
 
 DEFAULT_SEEDS = [0,25,50,75,100,125,150,175,200,325,350,375,400,425,450,475,500,525,550,575]
 
@@ -30,7 +31,9 @@ def main(argv=None):
     parser.add_argument('--hdv-mixtures', nargs='+', choices=MIXTURES)
     parser.add_argument('--max-controlled-cavs', type=int, help='Default: checkpoint budget')
     parser.add_argument('--gui', action='store_true')
+    add_video_arguments(parser)
     args = parser.parse_args(argv)
+    validate_video_arguments(parser, args)
     try:
         demands = [int(x) for x in args.eval_lane_demands.split(',')]
         prs = [float(x) for x in args.eval_prs.split(',')]
@@ -60,6 +63,7 @@ def main(argv=None):
         'arguments': vars(args), 'training_experiment': experiment, 'checkpoint_episode': checkpoint['episode'],
         'checkpoint_training_seed': checkpoint['seed'], 'scenario': scenario, 'hdv_mixtures': mixtures,
         'max_controlled_cavs': budget, 'step_seconds': 0.1}, default=str, indent=2), encoding='utf-8')
+    videos = VideoPlan(args, output/'recordings', 'traffic_shepherd_v2', 'evaluation')
     for mixture in mixtures:
         for demand in demands:
             for pr in prs:
@@ -68,8 +72,11 @@ def main(argv=None):
                 for seed in seeds:
                     torch.manual_seed(seed)
                     network, routes = prepare_scenario(output/'workspace', demand, pr, scenario, mixture)
+                    recording = videos.next(f'evaluation_{scenario}_{mixture}_d{demand}_pr{pr:g}_seed{seed}', args.max_steps,
+                        seed=seed, demand=demand, pr=pr, scenario=scenario, hdv_mixture=mixture,
+                        checkpoint=str(args.model_dir), checkpoint_episode=checkpoint['episode'], learner_updates=0)
                     env = TrafficShepherdV2Env(network, routes, seed, args.gui, budget,
-                        RewardConfig(**experiment['reward']), experiment['action_mode'], scenario)
+                        RewardConfig(**experiment['reward']), experiment['action_mode'], scenario, recording=recording)
                     collector = MergingMetrics(env.connection)
                     role_counts, hdv, requested, control_steps = np.zeros(5, int), {}, 0, 0
                     fields = ['time_s', 'vehicle', 'action', 'role', 'requested_acceleration',

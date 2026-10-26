@@ -24,7 +24,7 @@ class CommonRewardMergeEnv(TrafficShepherdV2Env):
         try:
             super().__init__(*args, **kwargs)
         except BaseException:
-            if hasattr(self, 'connection'):
+            if hasattr(self, 'connection') and not getattr(self, 'recording', None):
                 self.connection.close()
             raise
 

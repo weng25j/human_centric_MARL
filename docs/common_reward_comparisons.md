@@ -1,5 +1,10 @@
 # Common-reward research comparisons
 
+To record live SUMO MP4s during the real training/evaluation loops, add
+`--record-training --record-evaluation` to the runner or `--record-video` to an
+individual program. See the [recording guide](live_sumo_recording.md) for limits,
+outputs and GUI integration tests. All eleven common-suite methods are supported.
+
 This suite trains and evaluates **Traffic Shepherd 2.0 and ten comparisons under one SUMO/TraCI reward contract**. It adds the three methods referenced in the supplied Traffic Shepherd plan and two further paper-based MARL methods, QMIX and MAAC. The original Traffic Shepherd, flat MAPPO, Z-Merge, Nash Double-Q and fixed-policy programs/checkpoints remain available with their original settings.
 
 These are independent **common-reward SUMO adaptations of published algorithm mechanisms**, not claims to reproduce the papers' complete experiments, reported numbers or original reward functions. Standardizing the reward deliberately changes the referenced methods' original tasks. Trust-MARL's payoff coefficients and simulator-specific choices are especially important limitations, detailed below. Nash Double-Q continues to be labelled an adaptation.
