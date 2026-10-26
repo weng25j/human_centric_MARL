@@ -148,3 +148,41 @@ clip limits without truncating evaluation, compare recorded/headless seeded
 traffic metrics exactly, record a fixed policy and check the workbook MP4 index.
 `SHEPHERD_V2_SUMO_TESTS=1` and `COMMON_REWARD_SUMO_TESTS=1` additionally enable
 the existing simulator/paper-method integration tests.
+
+## Local execution evidence (2026-10-26)
+
+Verified on Windows with Python 3.10.20, CPU PyTorch 2.13.0, SUMO/TraCI 1.27.1
+and OpenCV 5.0.0:
+
+- **All 61 tests passed**, with `SUMO_VIDEO_TESTS=1`,
+  `SHEPHERD_V2_SUMO_TESTS=1` and `COMMON_REWARD_SUMO_TESTS=1`; no tests skipped.
+- A 1,000-step Shepherd 2.0 common-reward training episode completed 68 learner
+  updates and produced a 1,000-frame, 100-second MP4 at 10 FPS. Checkpoint
+  evaluation also produced a 1,000-frame, 100-second MP4. Both were decoded and
+  inspected, with real traffic visible at the merge.
+- The runner trained all eight common-suite learners for 100 steps and evaluated
+  all eleven methods for 100 steps, recording every other step. This produced
+  **19 valid MP4s**, each 50 frames at 5 FPS. These are startup/recording checks;
+  off-policy learners remain in their normal replay warmup during these short
+  clips. Earlier 1,000-step checks in the comparison guide verified actual
+  optimizer updates for every learner without changing production settings.
+- The exported workbook contains all eleven method reports and indexes all
+  nineteen MP4s. All-HDV uses 0% PR, as required by that baseline.
+- GUI tests compare two seeded recorded/headless evaluations exactly, verify
+  moving vehicles inside the SUMO viewport and nonzero recorded training
+  updates, exercise standalone 2.0 at `--video-every 2`, and confirm that a
+  50-step video cap does not truncate an 80-step evaluation.
+
+Generated local files are ignored by Git:
+
+- `runs/live_sumo_recordings/traffic_shepherd_2_training.mp4`
+- `runs/live_sumo_recordings/traffic_shepherd_2_evaluation.mp4`
+- `runs/live_sumo_recordings/all_methods/`: all-method videos, checkpoints and
+  reports, with CSV/Excel under `results/`.
+- `runs/live_sumo_recordings/recording_validation.json`: checked artifact counts,
+  method/phase coverage, file sizes and demo provenance.
+- `runs/live_sumo_recordings/regression_final.log`: full regression output.
+
+The two conveniently named demo files are byte-identical copies of the original
+1,000-step rollout recordings. These execution checks do not claim converged or
+safe policies, or published-paper performance.
