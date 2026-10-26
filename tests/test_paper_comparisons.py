@@ -141,10 +141,16 @@ class LearnerLifecycleTests(unittest.TestCase):
                 before = {k: v.clone() for k, v in agent.state_dict().items()}
                 for step in range(4):
                     decision = agent.act(f, epsilon=.1)
+                    if method == 'z_merge_common':
+                        decision.actions[:2] = [2, 3]  # both parameterized branches must learn
                     loss = agent.observe(f, decision, 20., f, step, final=step == 3)
                 self.assertGreater(agent.updates, 0)
                 self.assertTrue(all(np.isfinite(v) for v in loss.values()))
                 self.assertTrue(any(not torch.equal(value, agent.state_dict()[key]) for key, value in before.items()))
+                learned_roots = {'actor', 'critic', 'q', 'parameters_net', 'q1', 'q2', 'utility', 'mixer', 'online'}
+                for root in {key.split('.')[0] for key in before} & learned_roots:
+                    self.assertTrue(any(not torch.equal(value, agent.state_dict()[key])
+                                        for key, value in before.items() if key.startswith(root+'.')), root)
                 self.assertTrue(all(p.grad is None for name, p in agent.named_parameters() if name.startswith('target')))
                 agent.save(Path(td)/'checkpoint-1.pt', 1, {'scenario': 'ramp'})
                 loaded, payload = BenchmarkLearner.load(td, method, resume=True)

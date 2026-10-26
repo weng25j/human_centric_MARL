@@ -60,6 +60,21 @@ class SpreadsheetTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_common_suite_includes_every_method_and_keeps_legacy_rewards_separate(self):
+        args = pipeline.parse_args(['--suite', 'common'])
+        self.assertEqual(set(args.methods), set(pipeline.COMMON_METHODS))
+        with tempfile.TemporaryDirectory() as td, patch('builtins.print') as output:
+            destination = Path(td)/'not_created'
+            pipeline.main(['--suite', 'common', '--dry-run', '--run-dir', str(destination)])
+            text = '\n'.join(str(c) for c in output.call_args_list)
+            for method in pipeline.COMMON_METHODS:
+                self.assertIn(method, text)
+            self.assertIn('analysis.compare_common_reward', text)
+            self.assertNotIn('training.train_traffic_shepherd ', text)
+            self.assertFalse(destination.exists())
+        with patch('sys.stderr'), self.assertRaises(SystemExit):
+            pipeline.parse_args(['--suite', 'common', '--methods', 'shepherd'])
+
     def test_v2_is_opt_in_and_has_separate_modules_and_model_location(self):
         self.assertNotIn('shepherd_v2', pipeline.parse_args([]).methods)
         with tempfile.TemporaryDirectory() as td, patch('builtins.print') as output:

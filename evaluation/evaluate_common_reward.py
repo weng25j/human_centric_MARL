@@ -62,6 +62,8 @@ def main(argv=None, method=None):
     output.mkdir(parents=True, exist_ok=True)
     settings = {**reward_contract(), 'method': args.method, 'arguments': vars(args),
                 'training_seed': checkpoint['seed'], 'checkpoint_episode': checkpoint['episode'],
+                'training_environment_steps': agent.environment_steps if args.method not in FIXED else None,
+                'training_steps_per_episode': checkpoint.get('experiment', {}).get('max_steps'),
                 'scenario': args.scenario, 'hdv_mixtures': args.hdv_mixtures, 'evaluation_seeds': seeds,
                 'evaluation_steps': args.max_steps, 'max_controlled_cavs': 5}
     (output/'evaluation_settings.json').write_text(json.dumps(settings, default=str, indent=2), encoding='utf-8')

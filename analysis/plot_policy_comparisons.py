@@ -4,7 +4,7 @@ import csv
 import matplotlib.pyplot as plt
 import os
 
-def generate_charts(csv_file="combined_traffic_results.csv", output_dir="comparison_charts"):
+def generate_legacy_charts(csv_file="combined_traffic_results.csv", output_dir="comparison_charts"):
     # Create an output folder for the graphics
     os.makedirs(output_dir, exist_ok=True)
 
@@ -111,5 +111,19 @@ def generate_charts(csv_file="combined_traffic_results.csv", output_dir="compari
 
     print(f"Success! Generated {total_charts} high-resolution charts in the '{output_dir}' folder.")
 
+def generate_charts(csv_file="combined_traffic_results.csv", output_dir="comparison_charts"):
+    with open(csv_file, encoding='utf-8-sig', newline='') as stream:
+        columns = next(csv.reader(stream))
+    if 'Demand (vph)' in columns and 'Demand (vph/lane)' not in columns:
+        return generate_legacy_charts(csv_file, output_dir)
+    from analysis.plot_results import generate_charts as dynamic_charts
+    return dynamic_charts(csv_file, output_dir)
+
+
 if __name__ == "__main__":
-    generate_charts()
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--csv', default='combined_traffic_results.csv')
+    parser.add_argument('--output-dir', default='comparison_charts')
+    args = parser.parse_args()
+    generate_charts(args.csv, args.output_dir)

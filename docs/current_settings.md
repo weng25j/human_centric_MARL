@@ -143,3 +143,14 @@ The [2.0 guide](traffic_shepherd_v2.md) documents all features, reward component
 - Ramp default copies existing inputs. Lane-drop generation, HDV-mixture changes and ablations are explicit 2.0 options. SUMO safety mode 31; native lane changing remains enabled.
 - Runner: `--methods shepherd_v2`; 2.0 is excluded from the previous no-flags method list. No new dependency pins or mandatory environment variables. `SHEPHERD_V2_SUMO_TESTS=1` enables optional live simulator tests.
 - `scripts/show_settings.py` reports `effective_traffic_shepherd_v2_learner` directly from the new configuration class.
+
+## Common-reward paper comparisons
+
+See the [comparison guide](common_reward_comparisons.md) for paper sources, exact mechanisms, reward equation, method-specific defaults, training/evaluation commands and fidelity limits. This is a separate suite explicitly requested for reward equality; the legacy settings above remain unchanged.
+
+- Runner: `--suite common`, eight learned methods and three fixed policies; `--methods` selects a subset of `*_common` keys.
+- Reward: common mean-of-Shepherd-2.0 scalar, same E/S/T/F/C weights and one division by 20 for every learner. Trust reward blending and MA2C reward redistribution are disabled in this suite. Checkpoints and reports carry a reward source/configuration fingerprint.
+- Network, traffic generator, default mixture/curriculum, five-CAV budget, 0.1 s step and evaluation grid/seeds are shared. Safety mode 31 and common requested acceleration limits [-3,1.5] apply throughout. Lane-drop/mixture alternatives remain explicit.
+- Defaults: 3,000 × 1,000-step training and 4,000-step evaluation. `--common-episodes`, `--common-train-steps`, `--common-eval-steps`, `--common-eval-seeds`, `--common-scenario`, `--common-hdv-mixture`, `--common-model-root` configure the new workflow.
+- `effective_common_reward_learners` in `show_settings.py` reads `BenchmarkConfig` and the actual registry overrides. Configs/optimizer/RNG/counters are saved in versioned checkpoints; off-policy replay is not serialized.
+- No new dependency pins. `COMMON_REWARD_SUMO_TESTS=1` enables live simulator checks for all five paper mechanisms.

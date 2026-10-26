@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def generate_table_image(csv_path="combined_traffic_results.csv", output_path="reports/figures/comprehensive_results_table.png"):
+def generate_legacy_table_image(csv_path="combined_traffic_results.csv", output_path="reports/figures/comprehensive_results_table.png"):
     # Load your full dataset
     try:
         df = pd.read_csv(csv_path)
@@ -78,5 +78,15 @@ def generate_table_image(csv_path="combined_traffic_results.csv", output_path="r
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"Successfully generated high-resolution table image: {output_path}")
 
+def generate_table_image(csv_path="combined_traffic_results.csv", output_path="reports/figures/comprehensive_results_table.png"):
+    from analysis.plot_results import render_tables
+    return render_tables(csv_path, output_path)
+
+
 if __name__ == "__main__":
-    generate_table_image()
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--csv', default='combined_traffic_results.csv')
+    parser.add_argument('--output', default='reports/figures/comprehensive_results_table.png')
+    args = parser.parse_args()
+    generate_table_image(args.csv, args.output)

@@ -10,8 +10,11 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from common.benchmark_methods import METHODS as COMMON_METHODS, FIXED as COMMON_FIXED, LEARNED as COMMON_LEARNED
+
 DEFAULT_METHODS = ['shepherd', 'flat_mappo', 'z_merge', 'nash_double_q', 'baselines']
-METHODS = DEFAULT_METHODS + ['shepherd_v2']
+METHODS = DEFAULT_METHODS + ['shepherd_v2'] + list(COMMON_METHODS)
 MODULES = {'shepherd': 'traffic_shepherd', 'flat_mappo': 'flat_marl', 'z_merge': 'z_merge',
            'nash_double_q': 'nash_double_q', 'shepherd_v2': 'traffic_shepherd_v2'}
 
@@ -19,7 +22,8 @@ MODULES = {'shepherd': 'traffic_shepherd', 'flat_mappo': 'flat_marl', 'z_merge':
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--stage', choices=['all', 'train', 'evaluate', 'results'], default='all')
-    parser.add_argument('--methods', nargs='+', choices=METHODS, default=DEFAULT_METHODS)
+    parser.add_argument('--suite', choices=['legacy', 'common'], default='legacy', help='Common: reward-matched paper comparisons and Shepherd 2.0')
+    parser.add_argument('--methods', nargs='+', choices=METHODS)
     parser.add_argument('--run-dir', default=os.environ.get('MARL_RUN_DIR'))
     parser.add_argument('--seed', type=int, default=int(os.environ.get('MARL_SEED', '42')))
     parser.add_argument('--eval-demands', default=os.environ.get('MARL_EVAL_DEMANDS', '800,1700'))
@@ -42,12 +46,24 @@ def parse_args(argv=None):
     parser.add_argument('--v2-scenario', choices=['ramp', 'lane_drop'])
     parser.add_argument('--v2-hdv-mixture', choices=['default', 'cautious', 'aggressive'])
     parser.add_argument('--v2-ablation', choices=['full', 'no_fairness', 'no_stability', 'no_control_cost', 'primitive_actions'])
+    parser.add_argument('--common-model-root', type=Path, help='Folder containing METHOD/models/checkpoint-N.pt')
+    parser.add_argument('--common-episodes', type=int, default=3000)
+    parser.add_argument('--common-train-steps', type=int, default=1000)
+    parser.add_argument('--common-eval-steps', type=int, default=4000)
+    parser.add_argument('--common-eval-seeds', help='Optional comma-separated seed subset for common-reward evaluation')
+    parser.add_argument('--common-scenario', choices=['ramp', 'lane_drop'], default='ramp')
+    parser.add_argument('--common-hdv-mixture', choices=['default', 'cautious', 'aggressive'], default='default')
     parser.add_argument('--dry-run', action='store_true', help='Print commands without creating files or running jobs')
     args = parser.parse_args(argv)
+    args.methods = args.methods or (list(COMMON_METHODS) if args.suite == 'common' else DEFAULT_METHODS)
+    if args.suite == 'common' and any(m not in COMMON_METHODS for m in args.methods):
+        parser.error('The common suite accepts only *_common methods; legacy rewards are separate')
     if args.stage != 'all' and not args.run_dir:
         parser.error('--run-dir is required for separate stages')
     if args.zmerge_episodes < 1:
         parser.error('--zmerge-episodes must be positive')
+    if any(m in COMMON_METHODS for m in args.methods) and min(args.common_episodes, args.common_train_steps, args.common_eval_steps) < 1:
+        parser.error('Common-reward episode and step counts must be positive')
     if 'shepherd_v2' in args.methods:
         if min(args.v2_episodes, args.v2_train_steps, args.v2_eval_steps) < 1:
             parser.error('Shepherd 2.0 episode and step counts must be positive')
@@ -64,6 +80,9 @@ def parse_args(argv=None):
 
 
 def model_location(args, method, run_dir):
+    if method in COMMON_LEARNED:
+        root = args.common_model_root.expanduser().resolve() if args.common_model_root else run_dir/'models'
+        return root/method/'models'
     supplied = {'shepherd': args.shepherd_model_dir, 'flat_mappo': args.flat_model_dir,
                 'z_merge': args.zmerge_model_prefix, 'nash_double_q': args.nash_model_dir,
                 'shepherd_v2': args.v2_model_dir}[method]
@@ -145,13 +164,17 @@ def main(argv=None):
                 cwd.mkdir(parents=True, exist_ok=True)
                 if not (cwd/'SUMO_network').exists():
                     shutil.copytree(ROOT/'SUMO_network', cwd/'SUMO_network')
-            if args.stage in ['all', 'train'] and method != 'baselines':
+            if args.stage in ['all', 'train'] and method not in ('baselines', *COMMON_FIXED):
                 base = run_dir/'models'/method
                 if not args.dry_run:
                     if base.exists() and (any(base.rglob('*.pt')) or any(base.rglob('*.pth'))):
                         raise FileExistsError(f'Existing trained models in {base}; select a new run directory.')
                     base.mkdir(parents=True, exist_ok=True)
                 training_options = ['--seed', args.seed, '--base-dir', str(base)+os.sep]
+                if method in COMMON_LEARNED:
+                    training_options += ['--method', method, '--episodes', args.common_episodes,
+                        '--max-steps', args.common_train_steps, '--scenario', args.common_scenario,
+                        '--hdv-mixture', args.common_hdv_mixture]
                 if method == 'nash_double_q':
                     training_options += ['--episodes', args.nash_episodes, '--max-steps', args.nash_train_steps]
                 if method == 'shepherd_v2':
@@ -160,11 +183,21 @@ def main(argv=None):
                                         ('--ablation', args.v2_ablation)]:
                         if value:
                             training_options += [flag, value]
-                run(f'train_{method}', 'training.train_'+MODULES[method], training_options, cwd)
+                module = 'training.train_common_reward' if method in COMMON_LEARNED else 'training.train_'+MODULES[method]
+                run(f'train_{method}', module, training_options, cwd)
             elif args.stage == 'train':
                 print('Baselines are fixed policies: no training required.', flush=True)
             if args.stage in ['all', 'evaluate']:
-                if method == 'baselines':
+                common_options = ['--method', method, '--scenario', args.common_scenario,
+                    '--hdv-mixtures', args.common_hdv_mixture, '--max-steps', args.common_eval_steps,
+                    '--eval-lane-demands', args.eval_demands, '--eval-prs', args.eval_prs]
+                if args.common_eval_seeds:
+                    common_options += ['--seeds', args.common_eval_seeds]
+                if method in COMMON_FIXED:
+                    # Fixed policies have no checkpoint; still use isolated outputs.
+                    common_options += ['--output-dir', run_dir/'evaluation'/method/datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')]
+                    run(f'evaluate_{method}', 'evaluation.evaluate_common_reward', common_options, cwd)
+                elif method == 'baselines':
                     run('evaluate_baselines', 'evaluation.evaluate_rule_based',
                         ['--eval-lane-demands', args.eval_demands, '--eval-prs', args.eval_prs], cwd)
                 else:
@@ -195,11 +228,17 @@ def main(argv=None):
                                             ('--hdv-mixtures', args.v2_hdv_mixture)]:
                             if value:
                                 options += [flag, value]
-                    run(f'evaluate_{method}', 'evaluation.evaluate_'+MODULES[method], options, cwd)
+                    if method in COMMON_LEARNED:
+                        options = [*common_options, '--model-dir', model, '--output-dir', model/'reports']
+                    module = 'evaluation.evaluate_common_reward' if method in COMMON_LEARNED else 'evaluation.evaluate_'+MODULES[method]
+                    run(f'evaluate_{method}', module, options, cwd)
     if args.stage in ['all', 'evaluate', 'results']:
         run('results', 'analysis.combine_evaluation_reports',
             ['--search-dirs', run_dir, '--output-csv', run_dir/'results/combined_traffic_results.csv',
              '--output-xlsx', run_dir/'results/combined_traffic_results.xlsx'], ROOT)
+        if any(m in COMMON_METHODS for m in args.methods):
+            run('common_comparison', 'analysis.compare_common_reward',
+                ['--search-dirs', run_dir, '--output-dir', run_dir/'results/common_comparison'], ROOT)
     print('Finished.', flush=True)
 
 

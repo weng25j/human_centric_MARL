@@ -3,6 +3,7 @@ import numpy as np
 
 from algorithms.benchmark_base import BenchmarkConfig, BenchmarkLearner, Decision
 from common.benchmark import FIXED
+from common.benchmark_methods import CONFIG_OVERRIDES
 
 
 class FixedComparison(BenchmarkLearner):
@@ -12,16 +13,7 @@ class FixedComparison(BenchmarkLearner):
 
 def make_agent(method, config=None, seed=42):
     if config is None:
-        if method in ('shepherd_v2_common', 'flat_mappo_common'):
-            config = BenchmarkConfig(hidden=256, batch_size=256)
-        elif method == 'ma2c_common':
-            config = BenchmarkConfig(rollout_steps=20)
-        elif method == 'z_merge_common':
-            config = BenchmarkConfig(hidden=256, actor_lr=1e-4, critic_lr=1e-4, target_interval=35000)
-        elif method == 'nash_double_q_common':
-            config = BenchmarkConfig(hidden=128)
-        else:
-            config = BenchmarkConfig()
+        config = BenchmarkConfig(**CONFIG_OVERRIDES.get(method, {}))
     if method in FIXED:
         return FixedComparison(method, config, seed)
     if method in ('shepherd_v2_common', 'flat_mappo_common', 'ma2c_common'):

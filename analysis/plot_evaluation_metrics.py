@@ -169,7 +169,7 @@ def plot_time_series_npy(target_metric="speed", demand=1700, pr=20, max_steps=40
     print(f"Saved time-series chart: {out_path}")
     plt.close()
 
-def main():
+def legacy_main():
     try:
         df, metric_cols = load_and_clean_data("combined_traffic_results.csv")
     except FileNotFoundError as e:
@@ -215,6 +215,16 @@ def main():
                 plot_time_series_npy(target_metric=target, demand=demand, pr=pr)
 
     print("\nGraph generation complete. Check the 'graphs_output' directory.")
+
+def main():
+    import argparse
+    from analysis.plot_results import generate_charts
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--csv', default='combined_traffic_results.csv')
+    parser.add_argument('--output-dir', default='graphs_output')
+    args = parser.parse_args()
+    generate_charts(args.csv, args.output_dir)
+
 
 if __name__ == "__main__":
     main()

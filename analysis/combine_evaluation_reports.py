@@ -2,11 +2,12 @@
 import argparse
 import csv
 import math
+import json
 from pathlib import Path
 import re
 
 DEFAULT_DIRECTORIES = ['results', 'results_dongchen_baseline', 'results_zmerge', 'results_nash_double_q',
-                       'results_shepherd_v2']
+                       'results_shepherd_v2', 'results_common']
 NUMBER = r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?|[-+]?(?:nan|inf)'
 HEADER = re.compile(r'^(.*?):\s*(\d+(?:\.\d+)?)\s*(?:veh/h/lane|vph)\s*\|\s*'
                     r'(\d+(?:\.\d+)?)%\s*PR\s*\(Over\s*(\d+)\s*Seeds\)', re.M)
@@ -68,6 +69,17 @@ def parse_report(path):
             metrics.append({'Metric': column, 'Reported label': column, 'Value': float(value),
                             '95% CI': None, 'Unit': 'ms'})
     row['Source report'] = str(path)
+    metadata_path = path.with_suffix('.metadata.json')
+    if metadata_path.is_file():
+        metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
+        for source, target in [('protocol', 'Reward protocol'), ('reward_fingerprint', 'Reward fingerprint'),
+                               ('scenario', 'Scenario'), ('hdv_mixture', 'HDV mixture'),
+                               ('training_seed', 'Training seed'), ('checkpoint_episode', 'Checkpoint episode'),
+                               ('training_environment_steps', 'Training environment steps'),
+                               ('evaluation_steps', 'Evaluation steps'), ('max_controlled_cavs', 'Control budget')]:
+            row[target] = metadata.get(source)
+        row['Evaluation seeds'] = ','.join(map(str, metadata.get('evaluation_seeds', [])))
+        row['Method key'] = metadata.get('method')
     return row, metrics, text
 
 

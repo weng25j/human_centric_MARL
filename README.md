@@ -32,6 +32,16 @@ python scripts/run_experiments.py --methods shepherd_v2 --run-dir runs/shepherd_
 
 The existing no-flags runner keeps its previous default methods; 2.0 is opt-in. See the [2.0 guide](docs/traffic_shepherd_v2.md) for architecture, exact features/reward, commands, resume, ablations, outputs, live SUMO tests and research limitations.
 
+## Reward-matched research comparisons
+
+The [common-reward comparison suite](docs/common_reward_comparisons.md) adds the plan's **Z-Merge, Trust-MARL and MA2C** mechanisms and two further paper-based comparisons, **QMIX and MAAC**, with real SUMO/TraCI training and checkpoint evaluation. It also includes common-protocol versions of Shepherd 2.0, flat MAPPO, Nash Double-Q and the three fixed policies. Every method receives the same versioned scalar reward and reward scale; legacy programs/checkpoints retain their original rewards and settings.
+
+```bash
+python scripts/run_experiments.py --suite common --run-dir runs/common_01
+```
+
+This trains eight learners, evaluates all eleven methods, exports CSV/Excel, and generates comparison plots and paired differences. These are documented SUMO/common-reward adaptations, not claims to reproduce the papers' original experiments. In particular, Trust-MARL uses a declared kinematic game-payoff proxy, and MA2C transfers from traffic signals to moving vehicles. The [guide](docs/common_reward_comparisons.md) links the original papers, explains every method and adaptation, and gives per-method commands, resume, smoke tests, comparison safeguards and output details.
+
 ## New game-theoretic comparison
 
 The [Nash Double-Q merging adaptation](docs/nash_double_q.md) adds a structurally different, non-Chen baseline based on Li et al.'s 2024 interactive-merging publication. It learns two vehicles' joint-action payoff matrices and selects a Nash equilibrium, including mixed strategies when necessary. It is not a flat MARL or PPO variant. The linked review explains the literature sources, equations, declared SUMO adaptations, settings, fairness limits, and the distinction from an exact paper reproduction.

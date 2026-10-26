@@ -12,3 +12,6 @@ __pycache__/
 
 # Isolated experiment runs produced by scripts/run_experiments.py
 /runs/
+
+# Common-reward benchmark checkpoints, workspaces and evaluation artifacts
+/results_common/
