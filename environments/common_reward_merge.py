@@ -20,6 +20,14 @@ class Control:
 
 
 class CommonRewardMergeEnv(TrafficShepherdV2Env):
+    def __init__(self, *args, **kwargs):
+        try:
+            super().__init__(*args, **kwargs)
+        except BaseException:
+            if hasattr(self, 'connection'):
+                self.connection.close()
+            raise
+
     def command(self, name, control):
         if not isinstance(control, Control):
             raise TypeError('Comparison actions must be physical Control objects')
@@ -76,6 +84,10 @@ class Observer:
         self.method, self.ids = method, [None]*MAX_AGENTS
         self.histories = defaultdict(lambda: deque(maxlen=HISTORY))
         self.trust, self.previous, self.last_step = {}, {}, -1
+        self.previous_actions = {}
+
+    def record_actions(self, frame, actions):
+        self.previous_actions = {n: int(actions[i]) for i, n in enumerate(frame.ids) if n is not None}
 
     def _trust_update(self, env):
         for name in env.controlled_ids():
@@ -176,6 +188,11 @@ class Observer:
                                 key=lambda n: (np.linalg.norm(env.states[n]['position']-s['position']), n))[:3]
                 neighbor_state = [0.75*float(x) for n in others for x in base[n][:6]]
                 vector = np.concatenate([vector, neighbor_state+[0.0]*(18-len(neighbor_state))])
+            elif self.method == 'qmix_common':
+                previous = np.zeros(5)
+                if name in self.previous_actions:
+                    previous[self.previous_actions[name]] = 1
+                vector = np.concatenate([vector, previous])
             obs[slot] = np.clip(vector, -10, 10)
             self.histories[name].append(obs[slot].copy())
             values = np.stack(self.histories[name])
