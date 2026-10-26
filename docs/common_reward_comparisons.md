@@ -191,3 +191,44 @@ python -m unittest discover -s tests -v
 ```
 
 Tests cover the original methods; exact common reward arithmetic; stable slots and identity resets; real parameter updates and checkpoint round-trips for all eight learners; wrong-method/reward rejection; no-CAV frames; mixed trust games; hybrid SAC density and action masks; MA2C temporal/fingerprint dependence; QMIX monotonicity, greedy consistency and targets; MAAC attention/counterfactual isolation; Z-Merge Double-Q masks; live SUMO execution/learning for all five paper methods; and all-eleven-method export/plot provenance guards. Bounded training/evaluation validates execution and artifacts, not the papers' published results or learned-policy convergence.
+
+## Completed execution validation: 2026-10-26
+
+Validated locally on Windows with Python 3.10.20, CPU PyTorch 2.13.0, NumPy 2.2.6 and SUMO/TraCI 1.27.1, using the existing `rllib_env` interpreter and cached versions of the repository's test/export dependencies. The Python 3.12 setup and dependency pins were preserved.
+
+**All 53 tests passed**, with both live-SUMO test switches enabled. Actual actor, parameter-network, utility, mixer and critic weights changed in their respective learning tests; every learner's online/target networks and optimizers round-tripped through versioned checkpoints.
+
+The final smoke study used the unmodified ramp, demand 800 veh/h/lane, 20% PR, training seed 42 and one complete 1,000-step training episode per learner:
+
+| Learner | CAV-agent transitions | Optimizer updates |
+| --- | ---: | ---: |
+| Shepherd 2.0 common | 3,595 | 68 |
+| Flat MAPPO common | 4,100 | 68 |
+| Z-Merge common | 3,934 | 186 |
+| Trust-MARL common | 4,318 | 186 |
+| MA2C common | 4,096 | 50 |
+| QMIX | 4,107 | 186 |
+| MAAC | 4,119 | 186 |
+| Nash Double-Q common | 4,110 | 219 |
+
+All eight saved checkpoints and all three fixed policies then completed **1,000-step evaluations on each of seeds 0 and 25**: 22 successful evaluation rollouts. All-HDV used its required 0% PR. The final study therefore exercised 30,000 simulator steps across training and evaluation, beyond the smaller numerical/live regression checks and preliminary runs. These are execution/learning checks, not converged policies. SUMO's emergency-braking and lane-end stop warnings from the untrained policies remain visible in logs; successful software execution does not establish safe or superior traffic behavior.
+
+Additional artifact checks:
+
+- Recomputed all 1,500 per-step rewards from the three preliminary reference-method audit logs and their exact coefficients/collision denominators.
+- Checked that evaluation checkpoint copies are byte-identical to their saved training checkpoints. Early report provenance counters were enriched from those exact checkpoints without changing any recorded seed metrics.
+- Verified one reward fingerprint across all eleven final reports, matching methods, seeds, step horizons, training budgets and action bounds.
+- Opened the combined workbook and checked all eleven method keys and **33,000 numeric time-series values**; all saved arrays have the expected shape and finite values.
+- Generated **189 paired metric differences**, 44 per-metric charts, two condition-separated summary plots and two tables. Inspected a rendered comparison figure to confirm all ten 20%-PR method labels are visible; All-HDV appears in its separate 0%-PR condition.
+- Confirmed all original algorithm/training/evaluation files, SUMO input XML and dependency pins remain unchanged relative to the original checkout.
+
+The local artifacts are ignored by Git:
+
+- `runs/common_reference_methods/`: Z-Merge, Trust-MARL and MA2C training/evaluations.
+- `runs/common_extra_methods/`: QMIX and MAAC training/evaluations.
+- `runs/common_control_methods/`: Shepherd 2.0, flat MAPPO, Nash Double-Q and fixed controls.
+- `runs/common_reward_validation/combined_traffic_results.xlsx` and `.csv`: all-eleven-method aggregation.
+- `runs/common_reward_validation/comparison/`: matched-condition plots, numeric metrics and paired differences.
+- `runs/common_reward_validation/validation_summary.json`: actual transition/update/rollout/export counts and reward fingerprint.
+
+A full multi-seed training study and the complete evaluation grid remain necessary before making performance or convergence claims. No published-paper benchmark result is claimed by these checks.
